@@ -22,7 +22,6 @@ setClass(
     initpos = "numeric",
     initspeed = "numeric",
     
-    
     verbose = "numeric"
   ),
   
@@ -173,22 +172,28 @@ setMethod("SetYinitMode",signature="SWDMr_DDHO", function(object,mode="Free",val
     TimeCirca<-object@Gexp$Time[TimeCircaidx] # Time in given interval
     GexpCirca<-object@Gexp[,object@VarExp][TimeCircaidx] # Variable in given interval
     
-    reslm <- lm(GexpCirca ~ sin(((2*pi)/24)*TimeCirca)+cos(((2*pi)/24)*TimeCirca)) # Fit
+    omega<-(2*pi)/24
+    
+    reslm <- lm(GexpCirca ~ sin(omega*TimeCirca)+cos(omega*TimeCirca)) # Fit
     t1<-object@SWdist[1,"Time"]
     t2<-object@SWdist[2,"Time"]
     timestep<-t2-t1
     t0<-t1-timestep
-    post0<-as.numeric(reslm$coefficients[1]+reslm$coefficients[2]*sin(((2*pi)/24)*(t0))+ # position at t0
-                        reslm$coefficients[3]*cos(((2*pi)/24)*(t0)))
-    postm1<-as.numeric(reslm$coefficients[1]+reslm$coefficients[2]*sin(((2*pi)/24)*(t0-timestep))+ # position at t0-t1
-                         reslm$coefficients[3]*cos(((2*pi)/24)*(t0-timestep)))
-    speedt0<- (post0 - postm1) / timestep
     
-    if (any(c(is.na(postm1),is.na(speedt0)))){stop("Fit failed in the given interval")}
+    post0<-as.numeric(reslm$coefficients[1]+reslm$coefficients[2]*sin(omega*t0)+ # position at t0
+                        reslm$coefficients[3]*cos(omega*t0))
+    # postm1<-as.numeric(reslm$coefficients[1]+reslm$coefficients[2]*sin(((2*pi)/24)*(t0-timestep))+ # position at t0-t1
+    #                      reslm$coefficients[3]*cos(((2*pi)/24)*(t0-timestep)))
+    # speedt0<- (post0 - postm1) / timestep
+    # 
     
-    object@initpos <- postm1
-    object@initspeed <- speedt0
+    if (any(c(is.na(reslm$coefficients[2]),is.na(reslm$coefficients[3])))){stop("Fit failed in the given interval")}
     
+    # Initial position @ T0
+    object@initpos <- post0
+    # First derivative @ T0
+    object@initspeed <- reslm$coefficients[2] * (cos(omega*t0)) * omega + reslm$coefficients[3] * (-sin(omega*t0)) * omega
+     * omega 
     
   } else if (mode == "Intercept_0"){
     object@initmod <- "Intercept_0"
