@@ -1,12 +1,12 @@
 Package: SWDMr
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
+Title: Sleep-Wake driven model
 Version: 1.0
 Date: 2019-07-19
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more full sentences.
-License: GPL (>= 2)
+Author: Maxime Jan
+Maintainer: Maxime Jan <maxime.jan@unil.ch>
+Description: Sleep-Wake driven oscillator model.
+License: CC-BY
 Imports: Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
