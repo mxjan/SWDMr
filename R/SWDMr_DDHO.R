@@ -151,7 +151,7 @@ setMethod("AddEffect",signature="SWDMr_DDHO", function(object,AddName,value=nume
 #' @export
 #' @docType methods
 #' @examples
-#' model<-SetYinitMode(model,"SD")
+#' model<-SetYinitMode(model,"Intercept_0")
 setGeneric("SetYinitMode", function(object,mode="Free",values=numeric(0))
   standardGeneric("SetYinitMode") )
 
@@ -193,7 +193,6 @@ setMethod("SetYinitMode",signature="SWDMr_DDHO", function(object,mode="Free",val
     object@initpos <- post0
     # First derivative @ T0
     object@initspeed <- reslm$coefficients[2] * (cos(omega*t0)) * omega + reslm$coefficients[3] * (-sin(omega*t0)) * omega
-     * omega 
     
   } else if (mode == "Intercept_0"){
     object@initmod <- "Intercept_0"
