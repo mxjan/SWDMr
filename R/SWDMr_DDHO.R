@@ -29,6 +29,9 @@ setClass(
     initspeed = "numeric",
     
     PenalizeUnstableFit = "logical",
+    PredictedValueInterval = "numeric",
+    StabilityDayCheck = "numeric",
+    
     
     FittingValue = "character",
     
@@ -55,14 +58,98 @@ setClass(
 
 ############# Summaries ################
 
-setMethod("summary", "SWDMr_DDHO", function(object) {
-  cat("This is a SWDMr_DDHO object\n")
-  cat("This are you default free parameters\n")
+setGeneric("GetFreeFixedParams", function(object)
+  standardGeneric("GetFreeFixedParams") )
+setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object) {
+  
+  freeparams<-data.frame(parameter = character(0),subparameter=character(0),value=numeric(0),stringsAsFactors = F)
+  fixedparams<-data.frame(parameter = character(0),subparameter=character(0),value=numeric(0),stringsAsFactors = F)
+  
+  # Core params
+  for (param in c("intercept","omega","loggamma")){
+    if ( length(slot(object,param)) == 0){
+      freeparams<-rbind(freeparams,data.frame(parameter="Core parameter",subparameter=param,value=NA,stringsAsFactors = F))
+    }else{
+      fixedparams<-rbind(fixedparams,data.frame(parameter="Core parameter",subparameter=param,value=slot(object,param),stringsAsFactors = F))
+    }
+    #if ( length(slot(object,param)) == 0){freeparams[param] = T}else{fixedparams[param]<-slot(object,param)}
+  }
+  
+  # Forces
+  if (length(slot(object,"Forces")) > 0){
+    for (ForceName in names(slot(object,"Forces"))){
+      if (length(object@Forces[[ForceName]]) == 0){
+        freeparams<-rbind(freeparams,data.frame(parameter="Forces",subparameter=ForceName,value=NA,stringsAsFactors = F))
+      }else{
+        fixedparams<-rbind(fixedparams,data.frame(parameter="Forces",subparameter=ForceName,value=object@Forces[[ForceName]],stringsAsFactors = F))
+      }
+    }
+  }
+  
+  # Add Effect
+  if (length(slot(object,"AddEffects")) > 0){
+    for (AddEffect in names(slot(object,"AddEffects"))){
+      if (length(object@AddEffects[[AddEffect]]) == 0){
+        freeparams<-rbind(freeparams,data.frame(parameter="AddEffects",subparameter=AddEffect,value=NA,stringsAsFactors = F))
+      }else{
+        fixedparams<-rbind(fixedparams,data.frame(parameter="AddEffects",subparameter=AddEffect,value=object@AddEffects[[AddEffect]],stringsAsFactors = F))
+      }
+    }
+  }
+  
+  # Sin force
+  if (slot(object,"SinForce") == T){
+    for (SinFparam in c("AmpSin","PhiSin","PerSin")){
+      if (length(slot(object,SinFparam)) == 0){
+        freeparams<-rbind(freeparams,data.frame(parameter="SinForce",subparameter=SinFparam,value=NA,stringsAsFactors = F))
+      }else{
+        fixedparams<-rbind(fixedparams,data.frame(parameter="SinForce",subparameter=SinFparam,value=slot(object,SinFparam),stringsAsFactors = F))
+      }
+    }
+  }
+  
+  return(list(FreeParams = freeparams,FixedParams = fixedparams))
+  
 })
 
-setMethod("show", "SWDMr_DDHO", function(object) {
-  summary(object)
+
+setGeneric("ShowFreeParams", function(object)
+  standardGeneric("ShowFreeParams") )
+setMethod("ShowFreeParams","SWDMr_DDHO",function(object) {
+  
+  cat("~~~~~~~~~~~ Current parameter setting ~~~~~~~~~~ \n\n")
+  
+  parsedparams<-GetFreeFixedParams(object)
+  
+  freemsg<-"* [free parameters] "
+  
+  if (nrow(parsedparams$FreeParams) > 0){
+    for (i in 1:nrow(parsedparams$FreeParams)){
+      cat(freemsg,parsedparams$FreeParams[i,2]," (",parsedparams$FreeParams[i,1],") ","\n",sep = "") 
+    }
+  }
+  
+  cat("\n\n")
+  
+  freemsg<-"* [fixed parameters] "
+  
+  if (nrow(parsedparams$FixedParams) > 0){
+    for (i in 1:nrow(parsedparams$FixedParams)){
+      cat(freemsg,parsedparams$FixedParams[i,2]," (",parsedparams$FixedParams[i,1],") : ",parsedparams$FixedParams[i,3],"\n",sep = "") 
+    }
+  }
+  
+  cat("\n")
+  
 })
+
+
+setMethod("summary", "SWDMr_DDHO", function(object) {
+  cat("~~~~~~~~ This is a S4 SWDMr_DDHO object ~~~~~~~~ \n\n")
+  cat("Display the current setting for your fitting\n\n")
+  ShowFreeParams(object)
+})
+
 
 ############# Set model free/fixed parameters ################
 
@@ -270,3 +357,35 @@ setMethod("SetFittingValue",signature="SWDMr_DDHO", function(object,value = "RSS
   
   return(object)
 })
+
+#' Unstable Fit penalization
+#' 
+#' Penalize the fit that are unstable through replicated points
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value Set the penalization method (TRUE or FALSE)
+#' @param PredictedValueInterval A two value vector for min and max value observed
+#' @param StabilityDayCheck The number of day control for similiar min and max value compared to PredictedValueInterval
+#' @export
+#' @docType methods
+#' @examples
+#' # Example of 20 day of baseline replicated
+#' model<-ReplicateDrivingForce(model,c(0,24),20)
+#' # Then we control that the last 10 replicated day have similar min and max value compared to true baseline
+#' model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
+setGeneric("PenalizeUnstableFit", function(object,value = T,PredictedValueInterval,StabilityDayCheck)
+  standardGeneric("PenalizeUnstableFit") )
+
+setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = T,PredictedValueInterval,StabilityDayCheck){
+  
+  # Set penalization to True
+  object@PenalizeUnstableFit<-T
+  
+  if (length(PredictedValueInterval) != 2){stop("The PredictedValueInterval provided must be 2 values (e.g. c(0,24))")}
+  object@PredictedValueInterval<-PredictedValueInterval
+  
+  object@StabilityDayCheck<-StabilityDayCheck
+  
+  return(object)
+})
+

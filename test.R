@@ -30,12 +30,12 @@ summary(model)
 model
 FixNaturalFrequency(model,2*pi/24)
 model@omega
-model<-FixNaturalFrequency(model,2*pi/24)
-model<-FixDamping(model,log(0.015))
+#model<-FixNaturalFrequency(model,2*pi/24)
+#model<-FixDamping(model,log(0.015))
 model@omega
 model<-AddForce(model,"Wake",1)
 model<-AddForce(model,"Wake")
-model<-AddEffect(model,"SD")
+model<-AddEffect(model,"SD",1)
 model<-SetYinitMode(model,mode = "Free")
 model<-SetYinitMode(model,mode = "Fixed",c(1,2))
 model<-SetYinitMode(model,mode = "Intercept_0",c(1,2))
@@ -49,3 +49,11 @@ plot(model@SWdist$Time,model@SWdist$NREM,type="l")
 model<-AddSinF(model,FixPer = 24)
 model@SinForce
 model@PerSin
+
+model<-SetFittingValue(model,value = "RSS")
+
+object<-model
+
+model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
+
+
