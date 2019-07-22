@@ -30,7 +30,7 @@ setClass(
     
     PenalizeUnstableFit = "logical",
     
-    FittingValue<-"character",
+    FittingValue = "character",
     
     verbose = "numeric"
   ),
