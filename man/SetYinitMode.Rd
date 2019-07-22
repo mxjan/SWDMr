@@ -18,5 +18,5 @@ SetYinitMode(object, mode = "Free", values = numeric(0))
 Set the start position and speed of the oscillator
 }
 \examples{
-model<-SetYinitMode(model,"SD")
+model<-SetYinitMode(model,"Intercept_0")
 }

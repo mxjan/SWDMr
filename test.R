@@ -5,7 +5,7 @@ library(SWDMr)
 files <- list.files(path="../data/Sleep_States/",pattern = paste("^","BL6",sep=""),full.names = T)
 SWdf<-Read_SW(files,concattimesec = 360) # 300 = 5min, 180 = 3 min, 360 = 6min
 SWdf<-SWdf_AddLD(SWdf) # Add Light and Dark
-SWdf<-SWdf_DayMerging(SWdf,Daysformat=list(1,2,3,4,c(1,2)),concattimesec=360)
+SWdf<-SWdf_DayMerging(SWdf,Daysformat=list(c(1,2),c(1,2),3,4,c(1,2)),concattimesec=360)
 SWdf<-SWdf_AddSD(SWdf,c(48,54))
 
 # ***** Prepare Gene expression data ******
@@ -42,3 +42,6 @@ model<-SetYinitMode(model,mode = "Intercept_0",c(1,2))
 model<-SetYinitMode(model,mode = "CircadianFit",c(0,48))
 model@initpos
 model@initspeed
+
+model<-ReplicateDrivingForce(model,c(0.1,24.0),10)
+plot(model@SWdist$Time,model@SWdist$NREM)
