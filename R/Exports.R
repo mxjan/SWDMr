@@ -159,3 +159,17 @@ setGeneric("SetFittingValue", function(object,value = "RSS")
 #' model<-AddForce(model,"Wake")
 setGeneric("AddForce", function(object,ForceName,value=numeric(0))
   standardGeneric("AddForce") )
+
+#' GetFit data given model
+#' @param object An SWDMr model object
+#' @param params a named vector with required free parameter value
+#' @export
+#' @docType methods
+#' @examples 
+#' fitted<-GetFit(model)
+setGeneric("GetFit", function(object,params)
+  standardGeneric("GetFit") )
+
+
+
+

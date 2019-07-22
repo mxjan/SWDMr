@@ -58,3 +58,7 @@ model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), Sta
 
 model
 
+ControlParams(model,params=c(Wake=1,AmpSin=1,PhiSin=1)) # miss core param on purpose
+ControlParams(model,params=c(intercept=1,omega=1,loggamma=1,Wake=1,AmpSin=1,PhiSin=1))
+
+microbenchmark(GetFit(model,params),times=1000)

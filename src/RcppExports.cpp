@@ -5,6 +5,24 @@
 
 using namespace Rcpp;
 
+// SDDHO_SinF_RungeKutta
+List SDDHO_SinF_RungeKutta(NumericVector y, NumericVector time, NumericVector force, double gamma, double k, double AmpSin, double PhiSin, double PerSin);
+RcppExport SEXP _SWDMr_SDDHO_SinF_RungeKutta(SEXP ySEXP, SEXP timeSEXP, SEXP forceSEXP, SEXP gammaSEXP, SEXP kSEXP, SEXP AmpSinSEXP, SEXP PhiSinSEXP, SEXP PerSinSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type force(forceSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type AmpSin(AmpSinSEXP);
+    Rcpp::traits::input_parameter< double >::type PhiSin(PhiSinSEXP);
+    Rcpp::traits::input_parameter< double >::type PerSin(PerSinSEXP);
+    rcpp_result_gen = Rcpp::wrap(SDDHO_SinF_RungeKutta(y, time, force, gamma, k, AmpSin, PhiSin, PerSin));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _SWDMr_rcpp_hello_world() {
@@ -17,6 +35,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SWDMr_SDDHO_SinF_RungeKutta", (DL_FUNC) &_SWDMr_SDDHO_SinF_RungeKutta, 8},
     {"_SWDMr_rcpp_hello_world", (DL_FUNC) &_SWDMr_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };

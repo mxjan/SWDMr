@@ -8,7 +8,7 @@
         "-IC:/PROGRA~1/R/R-35~1.1/include",
         "-DNDEBUG"
     ],
-    "hash" : "1563523724",
+    "hash" : "1563523926",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }
