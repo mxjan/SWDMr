@@ -39,26 +39,11 @@ setMethod("show", "SWDMr", function(object) {
   summary(object)
 })
 
-
-#' Replicate baseline driving force
-#' 
-#' Replicate the baseline (given time interval) and happend it at the begining of your Force dataset
-#'
-#' @param object An SWDMr_DDHO object
-#' @param interval A two value time interval that is a 24h interval (time given is included, i.e. <= or >=)
-#' @param Nrep Number of repliated time interval
-#' @export
-#' @docType methods
-#' @examples
-#' swdmr<-ReplicateDrivingForce(swdmr,c(0,24),10)
-setGeneric("ReplicateDrivingForce", function(object,interval,Nrep)
-  standardGeneric("ReplicateDrivingForce") )
-
 setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nrep){
   
   # Some Controls
   if (length(interval) != 2){stop("The interval provided must be 2 values (e.g. c(0,24))")}
-
+  
   # Control that the interval is modulo 24h
   t1<-object@SWdist[1,"Time"]
   t2<-object@SWdist[2,"Time"]
@@ -73,4 +58,3 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
   
   return(object)
 })
-

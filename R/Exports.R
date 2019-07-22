@@ -31,3 +31,131 @@ initDDHOmodel<-function(object,VarExp){
 SWDMr <- function(SWdist,Gexp,verbose=1){
   new (Class="SWDMr",SWdist=SWdist,Gexp=Gexp,verbose=verbose)
 }
+
+#' Unstable Fit penalization
+#' 
+#' Penalize the fit that are unstable through replicated points
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value Set the penalization method (TRUE or FALSE)
+#' @param PredictedValueInterval A two value vector for min and max value observed
+#' @param StabilityDayCheck The number of day control for similiar min and max value compared to PredictedValueInterval
+#' @export
+#' @docType methods
+#' @examples
+#' # Example of 20 day of baseline replicated
+#' model<-ReplicateDrivingForce(model,c(0,24),20)
+#' # Then we control that the last 10 replicated day have similar min and max value compared to true baseline
+#' model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
+setGeneric("PenalizeUnstableFit", function(object,value = T,PredictedValueInterval,StabilityDayCheck)
+  standardGeneric("PenalizeUnstableFit") )
+
+
+#' Add Sin Force to the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param FixAmp Fix Sin Force Amplitude to the given value
+#' @param FixPhi Fix the Sin Force phase to the given value
+#' @param FixPer Fix the period (in hour) of the Sin Force
+#' @export
+#' @docType methods
+#' @examples
+#' model<-AddSinF(model,FixPer = 24)
+setGeneric("AddSinF", function(object,FixAmp=numeric(0),FixPhi=numeric(0),FixPer=numeric(0))
+  standardGeneric("AddSinF") )
+
+#' Set the start position and speed of the oscillator
+#'
+#' @param object An SWDMr_DDHO object
+#' @param mode character can be Free (default), Fixed, Intercept_0 or CircadianFit
+#' @param values if the mode is "Fixed", the values is start and speed of the oscillator (e.g. c(0,0) for start at 0 and speed of 0. If the mode is CircadianFit, values are the time interval for the circadian fit (e.g. c(0,48) for time 0 to time 48)
+#' @export
+#' @docType methods
+#' @examples
+#' model<-SetYinitMode(model,"Intercept_0")
+setGeneric("SetYinitMode", function(object,mode="Free",values=numeric(0))
+  standardGeneric("SetYinitMode") )
+
+#' Add Additive factor to the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param AddName character present in SWdist data.frame
+#' @param value if this is a free parameter, let it be empty.
+#' @export
+#' @docType methods
+#' @examples
+#' model<-AddEffect(model,"SD")
+setGeneric("AddEffect", function(object,AddName,value=numeric(0))
+  standardGeneric("AddEffect") )
+
+#' Fix intercept of the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value intercept
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixIntercept(model,0)
+setGeneric("FixIntercept", function(object,value)
+  standardGeneric("FixIntercept") )
+
+#' Fix damping of the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value log gamma 
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixNaturalFrequency(model,-2)
+setGeneric("FixDamping", function(object,value)
+  standardGeneric("FixDamping") )
+
+#' Fix natural frequency of the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value natural frequency 
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixNaturalFrequency(model,2*pi/24)
+setGeneric("FixNaturalFrequency", function(object,value)
+  standardGeneric("FixNaturalFrequency") )
+
+
+#' Replicate baseline driving force
+#' 
+#' Replicate the baseline (given time interval) and happend it at the begining of your Force dataset
+#'
+#' @param object An SWDMr_DDHO object
+#' @param interval A two value time interval that is a 24h interval (time given is included, i.e. <= or >=)
+#' @param Nrep Number of repliated time interval
+#' @export
+#' @docType methods
+#' @examples
+#' swdmr<-ReplicateDrivingForce(swdmr,c(0,24),10)
+setGeneric("ReplicateDrivingForce", function(object,interval,Nrep)
+  standardGeneric("ReplicateDrivingForce") )
+
+#' Fitting value
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value Set the fitting value return, can be Residual Sum of Square (RSS), Log likelihood (LL) or Negative Log Likelihood (NLL)
+#' @export
+#' @docType methods
+#' @examples
+#' model<-SetFittingValue(model,value = "RSS")
+setGeneric("SetFittingValue", function(object,value = "RSS")
+  standardGeneric("SetFittingValue") )
+
+
+#' Add Force to the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param ForceName character present in SWdist data.frame
+#' @param value if this is a free parameter, let it be empty.
+#' @export
+#' @docType methods
+#' @examples
+#' model<-AddForce(model,"Wake")
+setGeneric("AddForce", function(object,ForceName,value=numeric(0))
+  standardGeneric("AddForce") )

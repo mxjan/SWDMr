@@ -56,4 +56,5 @@ object<-model
 
 model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
 
+model
 
