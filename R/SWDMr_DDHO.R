@@ -334,7 +334,7 @@ setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=N
   
 })
 
-setMethod("GetFit",signature="SWDMr_DDHO", function(object,params){
+setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   
   # Control parameters given
   paramofmodel<-GetFreeFixedParams(object)
@@ -342,7 +342,7 @@ setMethod("GetFit",signature="SWDMr_DDHO", function(object,params){
   if (any(! expectedparams %in% names(params))){
     stop("Missing values in parameter given")
   }
-  paramofmodel$FreeParams$value<-params[paramofmodel$FreeParams$subparameter]
+  paramofmodel$FreeParams$value<-as.numeric(params[paramofmodel$FreeParams$subparameter])
   allparams<-rbind(paramofmodel$FreeParams,paramofmodel$FixedParams)
   allparams$value<-as.numeric(allparams$value)
   
@@ -404,3 +404,134 @@ setMethod("GetFit",signature="SWDMr_DDHO", function(object,params){
   
 })
 
+setGeneric("AddUnstableFitPenalization",  function(object,fitted,FittingValue,val,var)
+  standardGeneric("AddUnstableFitPenalization") )
+setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fitted,FittingValue,val,var){
+  
+  # Get min and max in intervals
+  interval_eval<-fitted$time >= object@PredictedValueInterval[1] & fitted$time <= object@PredictedValueInterval[2]
+  sodeinterval<-fitted$y1[interval_eval]
+  idxminv<-which(sodeinterval == min(sodeinterval))[1]
+  idxmaxv<-which(sodeinterval == max(sodeinterval))[1]
+  
+  modultimeminv<-fitted$time[interval_eval][idxminv] %% 24
+  modultimemaxv<-fitted$time[interval_eval][idxmaxv] %% 24
+  
+  
+  interval_eval_obs<-fitted$time >= object@PredictedValueInterval[1]-(object@StabilityDayCheck*24) & fitted$time <= object@PredictedValueInterval[1]
+  evaldaytime<-cumsum(c(object@PredictedValueInterval[1]-24,rep(-24,object@StabilityDayCheck)))
+  
+  evaldaytimemin<-evaldaytime + modultimeminv
+  evaldaytimemax<-evaldaytime + modultimemaxv
+  
+  obsmin<-fitted$y1[fitted$time %in% evaldaytimemin]
+  obsmax<-fitted$y1[fitted$time %in% evaldaytimemax]
+  obs<-c(obsmin,obsmax )
+  pred<-c(rep(min(sodeinterval),length(obsmin)),rep(max(sodeinterval),length(obsmax)))
+  
+  if (FittingValue == "RSS"){
+    return(val+sum((pred-obs)^2))
+  }
+  if (FittingValue == "NLL"){
+    # transform in LL
+    val <- -val
+    # Add likelihood
+    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))
+    # Return NLL
+    return(-val)
+  }
+  if (FittingValue == "LL"){
+    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))
+    return(val)
+  }
+})
+
+
+
+setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingValue="RSS",detailed=F){
+  
+  predv<-approxfun(fitted$time,fitted$y1)
+  predval<-predv(object@Gexp$Time)
+  
+  idx<- ! is.na(predval)
+  
+  GeneExp<-object@Gexp[idx,object@VarExp]
+  predval<-predval[idx]
+  
+  n <- length(GeneExp)
+  
+  if (detailed == F){
+    if (length(predval) == 0){
+      return(1e30)
+    }else{
+      RSS<-sum((GeneExp-predval)^2)
+    }
+    
+    if (FittingValue == "RSS"){
+      return(list(val=RSS,var=RSS/n))
+    }else{
+      var<-RSS/n
+      LL <- sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+      if (FittingValue == "NLL"){
+        return(list(val=-LL,var=var))
+      }else if (FittingValue == "LL") {
+        return(list(val=LL,var=var))
+      }
+    }
+  }else{
+    k <- nrow(GetFreeFixedParams(object)$FreeParams)
+    
+    RSS<-sum((GeneExp-predval)^2)
+    MSS<-sum((predval - mean(predval))^2)
+    R2<-MSS/(MSS+RSS)
+    
+    rdf<-n-k
+    AdjR2<- 1 - (1-R2) * ((n - 1)/rdf)
+    
+    resvar <- RSS/rdf
+    Fstat<-(MSS/(k - 1))/resvar
+    pvalF<-1-pf(Fstat,k-1,rdf)
+
+    var<-RSS/n
+    NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+    
+    BIC <- -2*(-NLL)+(k+1)*log(n) # add variance as parameter
+    AIC <- 2*(k+1) + n*log(RSS/n)
+    
+    return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,BIC=BIC,AIC=AIC,R2=R2,AdjR2=AdjR2,Fstat=Fstat,pvalF=pvalF,numdf=k-1,rdf=rdf,n=n,k=k,ErrorVariance=var)))
+  
+  }
+
+
+})
+
+
+setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object){
+  
+  # Return an objective function
+  objfun<-function(params){
+    
+    # Step 1. Fit function given params
+    out<-SWDMrFit(object,params)
+    
+    # Step 2. Get fitting value
+    stat<-SWDMrStats(object,out,FittingValue = object@FittingValue)
+    
+    # Step 3. If Penalization is set to True, compute 
+    if (object@PenalizeUnstableFit == T){
+      retval <- AddUnstableFitPenalization(object = object,
+                                           fitted = out,
+                                           FittingValue = object@FittingValue,
+                                           val = stat$val,
+                                           var = stat$var)
+    }else{
+      retval<-stat$val
+    }
+    
+    return(retval)
+    
+  }
+  
+  return(objfun)
+  
+})

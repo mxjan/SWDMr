@@ -38,7 +38,7 @@ model<-AddForce(model,"Wake")
 model<-AddEffect(model,"SD",1)
 model<-SetYinitMode(model,mode = "Free")
 model<-SetYinitMode(model,mode = "Fixed",c(1,2))
-model<-SetYinitMode(model,mode = "Intercept_0",c(1,2))
+model<-SetYinitMode(model,mode = "Intercept_0")
 model<-SetYinitMode(model,mode = "CircadianFit",c(0,48))
 model@initpos
 model@initspeed
@@ -52,13 +52,43 @@ model@PerSin
 
 model<-SetFittingValue(model,value = "RSS")
 
-object<-model
-
 model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
 
 model
 
-ControlParams(model,params=c(Wake=1,AmpSin=1,PhiSin=1)) # miss core param on purpose
-ControlParams(model,params=c(intercept=1,omega=1,loggamma=1,Wake=1,AmpSin=1,PhiSin=1))
 
-microbenchmark(GetFit(model,params),times=1000)
+params=c(intercept=1,omega=1,loggamma=1,Wake=1,AmpSin=1,PhiSin=1)
+
+library(microbenchmark)
+microbenchmark(SWDMrFit(model,params),times=1000)
+
+out<-SWDMrFit(model,params)
+plot(out$time,out$y1,type="l")
+
+model<-SetYinitMode(model,mode = "Intercept_0")
+out<-SWDMrFit(model,params)
+plot(out$time,out$y1,type="l")
+
+SWDMrStats(model,out,detailed = T)
+
+stat<-SWDMrStats(model,out,FittingValue = "RSS")
+stat$val
+RSSpen<-AddUnstableFitPenalization(object = model,fitted = out,FittingValue = "RSS",val = stat$val, var = stat$var)
+RSSpen
+
+stat<-SWDMrStats(model,out,FittingValue = "NLL")
+stat$val
+NLLpen<-AddUnstableFitPenalization(object = model,fitted = out,FittingValue = "NLL",val = stat$val, var = stat$var)
+NLLpen
+
+
+library(optimx)
+objfun<-SWDMrGetEvalFun(model)
+params["intercept"]<-5.5
+params["omega"]<-2*pi/23.75
+params["loggamma"]<-log(0.01)
+params["Wake"]<-0
+params["AmpSin"]<-0
+optimxres<-optimx(params,objfun,method="nlminb")
+out<-SWDMrFit(model,params = optimxres[1,])
+plot(out$time,out$y1,type="l")

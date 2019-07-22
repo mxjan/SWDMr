@@ -6,7 +6,3 @@ SDDHO_SinF_RungeKutta <- function(y, time, force, gamma, k, AmpSin, PhiSin, PerS
     .Call(`_SWDMr_SDDHO_SinF_RungeKutta`, y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
 }
 
-rcpp_hello_world <- function() {
-    .Call(`_SWDMr_rcpp_hello_world`)
-}
-

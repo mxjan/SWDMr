@@ -160,16 +160,36 @@ setGeneric("SetFittingValue", function(object,value = "RSS")
 setGeneric("AddForce", function(object,ForceName,value=numeric(0))
   standardGeneric("AddForce") )
 
-#' GetFit data given model
+#' Fit data given model
 #' @param object An SWDMr model object
 #' @param params a named vector with required free parameter value
 #' @export
 #' @docType methods
 #' @examples 
-#' fitted<-GetFit(model)
-setGeneric("GetFit", function(object,params)
-  standardGeneric("GetFit") )
+#' fitted<-SWDMrFit(model)
+setGeneric("SWDMrFit", function(object,params)
+  standardGeneric("SWDMrFit") )
 
 
+#' Return statistics of the fitting
+#' @param object An SWDMr model object
+#' @param fitted fitted value
+#' @param FittingValue What value to return for the fitting (RSS or NLL or LL)
+#' @param detailed If set to True, return all value (RSS,NLL,LL,BIC), N, nparams
+#' @export
+#' @docType methods
+#' @examples 
+#' fitted<-SWDMrFit(model,params)
+#' stats<-SWDMrStats(model,fitted)
+setGeneric("SWDMrStats", function(object,fitted,FittingValue="RSS",detailed=F)
+  standardGeneric("SWDMrStats") )
 
-
+#' Return function to evaluate
+#' @param object An SWDMr model object
+#' @export
+#' @docType methods
+#' @examples 
+#' objfun<-SWDMrGetEvalFun(model)
+#' optimx(objfunc,params)
+setGeneric("SWDMrGetEvalFun", function(object)
+  standardGeneric("SWDMrGetEvalFun") )
