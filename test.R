@@ -44,4 +44,8 @@ model@initpos
 model@initspeed
 
 model<-ReplicateDrivingForce(model,c(0.1,24.0),10)
-plot(model@SWdist$Time,model@SWdist$NREM)
+plot(model@SWdist$Time,model@SWdist$NREM,type="l")
+
+model<-AddSinF(model,FixPer = 24)
+model@SinForce
+model@PerSin

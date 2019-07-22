@@ -8,15 +8,21 @@ setClass(
   
   # Define the slots
   representation = representation(
+    
     VarExp = "character",
+    
     intercept = "numeric",
     omega = "numeric",
     loggamma = "numeric",
+    
+    Forces = "list",
+    
+    AddEffects = "list",
+    
+    SinForce = "logical",
     AmpSin = "numeric",
     PhiSin = "numeric",
     PerSin = "numeric",
-    Forces = "list",
-    AddEffects = "list",
     
     initmod = "character",
     initpos = "numeric",
@@ -29,6 +35,9 @@ setClass(
     initmod = "Free",
     initpos = 0,
     initspeed = 0,
+    
+    SinForce = F,
+    
     verbose = 1
   ),
   
@@ -204,5 +213,29 @@ setMethod("SetYinitMode",signature="SWDMr_DDHO", function(object,mode="Free",val
     
   }
   
+  return(object)
+})
+
+
+#' Add Sin Force to the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @param FixAmp Fix Sin Force Amplitude to the given value
+#' @param FixPhi Fix the Sin Force phase to the given value
+#' @param FixPer Fix the period (in hour) of the Sin Force
+#' @export
+#' @docType methods
+#' @examples
+#' model<-AddSinF(model,FixPer = 24)
+setGeneric("AddSinF", function(object,FixAmp=numeric(0),FixPhi=numeric(0),FixPer=numeric(0))
+  standardGeneric("AddSinF") )
+
+setMethod("AddSinF",signature="SWDMr_DDHO", function(object,FixAmp=numeric(0),FixPhi=numeric(0),FixPer=numeric(0)){
+  
+  object@SinForce<-T
+  object@AmpSin<-FixAmp
+  object@PhiSin<-FixPhi
+  object@PerSin<-FixPer
+
   return(object)
 })
