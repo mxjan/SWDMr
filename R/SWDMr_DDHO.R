@@ -28,6 +28,10 @@ setClass(
     initpos = "numeric",
     initspeed = "numeric",
     
+    PenalizeUnstableFit = "logical",
+    
+    FittingValue<-"character",
+    
     verbose = "numeric"
   ),
   
@@ -37,6 +41,10 @@ setClass(
     initspeed = 0,
     
     SinForce = F,
+    
+    PenalizeUnstableFit = F,
+    
+    FittingValue = "RSS",
     
     verbose = 1
   ),
@@ -237,5 +245,28 @@ setMethod("AddSinF",signature="SWDMr_DDHO", function(object,FixAmp=numeric(0),Fi
   object@PhiSin<-FixPhi
   object@PerSin<-FixPer
 
+  return(object)
+})
+
+
+#' Fitting value
+#'
+#' @param object An SWDMr_DDHO object
+#' @param value Set the fitting value return, can be Residual Sum of Square (RSS), Log likelihood (LL) or Negative Log Likelihood (NLL)
+#' @export
+#' @docType methods
+#' @examples
+#' model<-SetFittingValue(model,value = "RSS")
+setGeneric("SetFittingValue", function(object,value = "RSS")
+  standardGeneric("SetFittingValue") )
+
+setMethod("SetFittingValue",signature="SWDMr_DDHO", function(object,value = "RSS"){
+  
+  if (! value %in% c("RSS","NLL","LL")){
+    stop("The returned value should be RSS, NLL or LL")
+  }
+  
+  object@FittingValue <- value
+  
   return(object)
 })
