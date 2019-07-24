@@ -311,7 +311,8 @@ setGeneric("SumForces",  function(object,params,allparams=NULL)
 setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=NULL){
   
   if (is.null(allparams)){
-    paramofmodel$FreeParams$value<-params[paramofmodel$FreeParams$subparameter]
+    paramofmodel<-GetFreeFixedParams(object)
+    paramofmodel$FreeParams$value<-as.numeric(params[paramofmodel$FreeParams$subparameter])
     allparams<-rbind(paramofmodel$FreeParams,paramofmodel$FixedParams)
     allparams$value<-as.numeric(allparams$value)
   }
@@ -320,12 +321,13 @@ setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=N
   if (length(idxForces) > 0){
     Forces<-allparams[idxForces,"value"]
     SWf<-object@SWdist[,allparams[idxForces,"subparameter"],drop=F]
-    SWf<-as.matrix(mapply(`*`,SWf,Forces))
-    if (length(Forces) > 1){
-      Force<-rowSums(SWf)
-    }else{
-      Force<-SWf[,1]
-    }
+    Force <- (as.matrix(SWf) %*% Forces)[,1]
+    # SWf<-as.matrix(mapply(`*`,SWf,Forces))
+    # if (length(Forces) > 1){
+    #   Force<-rowSums(SWf)
+    # }else{
+    #   Force<-SWf[,1]
+    # }
   }else{
     Force<-rep(0,nrow(GEMS$SWdistr))
   }

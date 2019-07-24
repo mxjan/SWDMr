@@ -92,3 +92,55 @@ params["AmpSin"]<-0
 optimxres<-optimx(params,objfun,method="nlminb")
 out<-SWDMrFit(model,params = optimxres[1,])
 plot(out$time,out$y1,type="l")
+
+
+################################################################################
+Gene<-"Arntl"
+MeanPerTime<-aggregate(rna_expr[rna_meta$SD_NSD == "NSD",Gene],list(rna_meta$time[rna_meta$SD_NSD == "NSD"]),mean)
+MeanGeneExprInBaseline<-(max(MeanPerTime$x)+min(MeanPerTime$x))/2
+
+############# Build model ###############
+model<-initDDHOmodel(swdmr,VarExp = Gene)
+
+# Mean expression in baseline
+MeanPerTime<-aggregate(rna_expr[rna_meta$SD_NSD == "NSD",Gene],list(rna_meta$time[rna_meta$SD_NSD == "NSD"]),mean)
+MeanGeneExprInBaseline<-(max(MeanPerTime$x)+min(MeanPerTime$x))/2
+# Fix the intercept
+model<-FixIntercept(model,MeanGeneExprInBaseline)
+# Add sleep-wake force
+model<-AddForce(model,"Wake")
+model<-AddForce(model,"Sleep")
+# Start is set at intercept with speed of 0
+model<-SetYinitMode(model,mode = "Intercept_0",values = c(0,48))
+# We replicate baseline for 20 day
+model<-ReplicateDrivingForce(model,c(0.1,24.0),20)
+# A sin-wave force is applied with a period of 24h
+model<-AddSinF(model,FixPer = 24)
+# Compute the fit using RSS
+model<-SetFittingValue(model,value = "RSS")
+# Penalize the fitting for unstable value for 10 replicated days
+model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,48), StabilityDayCheck = 10)
+
+# Get objective function
+objfun<-SWDMrGetEvalFun(model)
+# Limits of the model
+params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=1,PhiSin=5.2)
+lower<-c(Wake=-Inf,Sleep=-Inf,loggamma=-Inf,omega=2*pi/25,AmpSin=0,PhiSin=0)
+upper<-c(Wake=Inf,Sleep=Inf,loggamma=Inf,omega=2*pi/20,AmpSin=Inf,PhiSin=2*pi)
+# Fit
+optimxres<-optimx(params,objfun,method=c("nlminb"),lower = lower,upper=upper)
+optimxres
+
+out<-SWDMrFit(model,params = optimxres[1,])
+plot(out$time,out$y1,type="l",ylim=c(min(c(out$y1,model@Gexp[,Gene])) , max(c(out$y1,model@Gexp[,Gene]))))
+plot(out$time,out$y1,type="l",xlim=c(0,120),ylim=c(min(c(out$y1,model@Gexp[,Gene])) , max(c(out$y1,model@Gexp[,Gene]))))
+points(model@Gexp$Time,model@Gexp[,Gene])
+
+
+microbenchmark(SumForces(model,optimxres[1,]),times = 100)
+
+microbenchmark(as.matrix(mapply(`*`,SWf,Forces)),times  = 1000)
+microbenchmark(as.matrix(SWf) %*% Forces,times = 1000)
+
+head(SumForces(model,optimxres[1,]))
+head(as.matrix(SWf) %*% Forces)[,1]
