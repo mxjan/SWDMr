@@ -373,7 +373,7 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   }
   
   # Fit
-  out<-SDDHO_SinF_RungeKutta(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin) # Solve ODE, see src/sddho_sinforce_RK4.cpp
+  out<-SWDMr:::SDDHO_SinF_RungeKutta(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin) # Solve ODE, see src/sddho_sinforce_RK4.cpp
   
   # Add intercept to data
   out$y1 <- out$y1 + intercept

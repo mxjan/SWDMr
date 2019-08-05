@@ -3,6 +3,6 @@
 
 #' @export
 SDDHO_SinF_RungeKutta <- function(y, time, force, gamma, k, AmpSin, PhiSin, PerSin) {
-    .Call(`_SWDMr_SDDHO_SinF_RungeKutta`, y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
+    .Call('_SWDMr_SDDHO_SinF_RungeKutta', PACKAGE = 'SWDMr', y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
 }
 
