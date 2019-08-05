@@ -166,7 +166,7 @@ setGeneric("AddForce", function(object,ForceName,value=numeric(0))
 #' @export
 #' @docType methods
 #' @examples 
-#' fitted<-SWDMrFit(model)
+#' fitted<-SWDMrFit(model,params)
 setGeneric("SWDMrFit", function(object,params)
   standardGeneric("SWDMrFit") )
 

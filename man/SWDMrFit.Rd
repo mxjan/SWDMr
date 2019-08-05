@@ -16,5 +16,5 @@ SWDMrFit(object, params)
 Fit data given model
 }
 \examples{
-fitted<-SWDMrFit(model)
+fitted<-SWDMrFit(model,params)
 }

@@ -58,3 +58,27 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
   
   return(object)
 })
+
+
+setGeneric("SDSimulation",  function(object,StartTime,Duration)
+  standardGeneric("SDSimulation") )
+setMethod("SDSimulation",signature="SWDMr",function(object,StartTime,Duration){
+  
+  timestep<-object@SWdist$Time[2]-object@SWdist$Time[1]
+  idxSimu<-which(object@SWdist$Time >= StartTime & object@SWdist$Time <= StartTime+Duration-timestep)
+  
+  # Keep only time points 
+  newSWdf<-object@SWdist[seq(1,min(idxSimu)-1),]
+  SndSDSWdf<-object@SWdist[idxSimu,]
+  
+  SndSDSWdf$NREM<-rep(0,nrow(SndSDSWdf))
+  SndSDSWdf$REM<-rep(0,nrow(SndSDSWdf))
+  SndSDSWdf$Sleep<-rep(0,nrow(SndSDSWdf))
+  SndSDSWdf$Wake<-rep(max(SWdf$Wake),nrow(SndSDSWdf))
+  SndSDSWdf$SD<-rep(1,nrow(SndSDSWdf))
+  
+  object@SWdist<-rbind(newSWdf,SndSDSWdf)
+  
+  return(object)
+  
+})

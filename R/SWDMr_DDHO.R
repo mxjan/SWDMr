@@ -311,10 +311,7 @@ setGeneric("SumForces",  function(object,params,allparams=NULL)
 setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=NULL){
   
   if (is.null(allparams)){
-    paramofmodel<-GetFreeFixedParams(object)
-    paramofmodel$FreeParams$value<-as.numeric(params[paramofmodel$FreeParams$subparameter])
-    allparams<-rbind(paramofmodel$FreeParams,paramofmodel$FixedParams)
-    allparams$value<-as.numeric(allparams$value)
+    allparams<-GetAllParams(object,params)
   }
   
   idxForces<-which(allparams$parameter == "Forces")
@@ -329,7 +326,7 @@ setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=N
     #   Force<-SWf[,1]
     # }
   }else{
-    Force<-rep(0,nrow(GEMS$SWdistr))
+    Force<-rep(0,nrow(object@SWdist))
   }
   
   return(Force)
@@ -339,14 +336,7 @@ setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=N
 setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   
   # Control parameters given
-  paramofmodel<-GetFreeFixedParams(object)
-  expectedparams<-paramofmodel$FreeParams[,"subparameter"]
-  if (any(! expectedparams %in% names(params))){
-    stop("Missing values in parameter given")
-  }
-  paramofmodel$FreeParams$value<-as.numeric(params[paramofmodel$FreeParams$subparameter])
-  allparams<-rbind(paramofmodel$FreeParams,paramofmodel$FixedParams)
-  allparams$value<-as.numeric(allparams$value)
+  allparams<-GetAllParams(object,params)
   
   # Get Core params
   intercept_idx<-which(allparams$subparameter == "intercept")
@@ -537,3 +527,116 @@ setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object){
   return(objfun)
   
 })
+
+
+setGeneric("StatsPerTimePoint", function(object) 
+  standardGeneric("StatsPerTimePoint") )
+setMethod("StatsPerTimePoint",signature="SWDMr_DDHO", function(object){
+  meansd<-matrix(ncol=3,nrow=length(unique(object@Gexp$Time)))
+  colnames(meansd)<-c("mean","sd","se")
+  rownames(meansd)<-unique(object@Gexp$Time)
+  for (i in unique(object@Gexp$Time)){
+    vals<-object@Gexp[object@Gexp$Time == i,object@VarExp]
+    meansd[as.character(i),1]<-mean(vals)
+    meansd[as.character(i),2]<-sd(vals)
+    meansd[as.character(i),3]<-sd(vals)/sqrt(length(vals))
+  }
+  return(meansd)
+})
+
+
+setGeneric("GetAllParams", function(object,params)
+  standardGeneric("GetAllParams") )
+setMethod("GetAllParams",signature="SWDMr_DDHO",function(object,params){
+  
+  paramofmodel<-GetFreeFixedParams(object)
+  expectedparams<-paramofmodel$FreeParams[,"subparameter"]
+  if (any(! expectedparams %in% names(params))){
+    stop("Missing values in parameter given")
+  }
+  paramofmodel$FreeParams$value<-as.numeric(params[paramofmodel$FreeParams$subparameter])
+  allparams<-rbind(paramofmodel$FreeParams,paramofmodel$FixedParams)
+  allparams$value<-as.numeric(allparams$value)
+  
+  return(allparams)
+  
+})
+
+setGeneric("ForceApplied", function(object,params) 
+  standardGeneric("ForceApplied") )
+setMethod("ForceApplied",signature="SWDMr_DDHO",function(object,params){
+  
+  allparams<-GetAllParams(object,params)
+  
+  force<-rep(0,length(object@SWdist$Time))
+  time<-(object@SWdist$Time)  
+  
+  if (any(allparams$parameter %in% c("Forces","SinForce"))){
+    
+    if ("Forces" %in% allparams$parameter){
+      for (i in allparams$subparameter[allparams$parameter == "Forces"]){
+        force <- force + (object@SWdist[,i]*allparams$value[allparams$subparameter == i])
+      }
+    }
+    
+    if ("SinForce" %in% allparams$parameter){
+      amp<-allparams$value[allparams$subparameter == "AmpSin"]
+      phi<-allparams$value[allparams$subparameter == "PhiSin"]
+      per<-allparams$value[allparams$subparameter == "PerSin"]
+      force <- force + amp * sin(2*pi/per * time + phi) 
+    }
+    
+    return(list(force=force,time=time))
+    
+  }else{
+    stop("No force applied to the model")
+  }
+  
+})
+
+setGeneric("PctAbsForceApplied", function(object,params,pct=T) 
+  standardGeneric("PctAbsForceApplied") )
+setMethod("PctAbsForceApplied",signature="SWDMr_DDHO",function(object,params,pct=T){
+  
+  allparams<-GetAllParams(object,params)
+  
+  time<-(object@SWdist$Time)  
+  
+  if (any(allparams$parameter %in% c("Forces","SinForce"))){
+    
+    mF<-matrix(time,ncol=1)
+    colnames(mF)<-"Time"
+    
+    if ("Forces" %in% allparams$parameter){
+      for (i in allparams$subparameter[allparams$parameter == "Forces"]){
+        #force <- force + (object@SWdist[,i]*allparams$value[allparams$subparameter == i])
+        mF<-cbind(mF,(object@SWdist[,i]*allparams$value[allparams$subparameter == i]))
+        colnames(mF)[ncol(mF)]<-i
+      }
+    }
+    
+    if ("SinForce" %in% allparams$parameter){
+      amp<-allparams$value[allparams$subparameter == "AmpSin"]
+      phi<-allparams$value[allparams$subparameter == "PhiSin"]
+      per<-allparams$value[allparams$subparameter == "PerSin"]
+      #force <- force + amp * sin(2*pi/per * time + phi) 
+      mF<-cbind(mF,amp * sin(2*pi/per * time + phi) )
+      colnames(mF)[ncol(mF)]<-"SinF"
+    }
+    
+    totabsF<-apply(abs(mF[,2:ncol(mF)]),1,sum)
+    
+    if (pct==T){
+      for (i in 2:ncol(mF)){
+        mF[,i]<-abs(mF[,i]/totabsF)
+      }
+    }
+
+    return(as.data.frame(mF))
+    
+  }else{
+    stop("No force applied to the model")
+  }
+  
+})
+
