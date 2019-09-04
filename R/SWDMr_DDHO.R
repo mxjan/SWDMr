@@ -473,6 +473,12 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
   }else{
     k <- nrow(GetFreeFixedParams(object)$FreeParams)
     
+    
+    # R2 NOT VALID FOR NON LINEAR MODELS ! DOES NOT ADD UP TO 100 !!
+    # https://statisticsbyjim.com/regression/r-squared-invalid-nonlinear-regression/
+    # Use Standard Error of regression https://statisticsbyjim.com/regression/standard-error-regression-vs-r-squared/
+    # SEE SOME STATS HERE: http://sia.webpopix.org/nonlinearRegression.html
+    # See Note on the R2 measure of goodness of fit for nonlinear models (TARALD O. KVALSETH, 1983)
     RSS<-sum((GeneExp-predval)^2)
     MSS<-sum((predval - mean(predval))^2)
     R2<-MSS/(MSS+RSS)
@@ -486,11 +492,25 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
 
     var<-RSS/n
     NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+    # Faster ?
+    #((-n/2)*log(2*pi)) - ((n/2)*log(sigma2)) - (RSS/(2*var))
+    
     
     BIC <- -2*(-NLL)+(k+1)*log(n) # add variance as parameter
     AIC <- 2*(k+1) + n*log(RSS/n)
     
-    return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,BIC=BIC,AIC=AIC,R2=R2,AdjR2=AdjR2,Fstat=Fstat,pvalF=pvalF,numdf=k-1,rdf=rdf,n=n,k=k,ErrorVariance=var)))
+    # Flat model
+    lm_flat<-lm(GeneExp~1)
+    RSS_flat<-sum(resid(lm_flat)^2)
+    var_flat<-RSS_flat/n
+    NLL_flat<- -1* ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS/(2*var_flat))
+    BIC_flat <- -2*(-NLL)+(1+1)*log(n)
+    BF_DDHOvFlat<-exp((BIC-BIC_flat)/2)
+    
+    
+    return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,
+                              BIC=BIC,BIC_flat=BIC_flat,BayesFactor=BF_DDHOvFlat,
+                              AIC=AIC,R2=R2,AdjR2=AdjR2,Fstat=Fstat,pvalF=pvalF,numdf=k-1,rdf=rdf,n=n,k=k,ErrorVariance=var)))
   
   }
 
@@ -640,3 +660,48 @@ setMethod("PctAbsForceApplied",signature="SWDMr_DDHO",function(object,params,pct
   
 })
 
+
+setGeneric("AllForceApplied", function(object,params) 
+  standardGeneric("AllForceApplied") )
+setMethod("AllForceApplied",signature="SWDMr_DDHO",function(object,params){
+  
+  allparams<-SWDMr:::GetAllParams(object,params)
+  
+  time<-(object@SWdist$Time)  
+  
+  mF<-matrix(time,ncol=1)
+  colnames(mF)<-"Time"
+  
+  # External forces
+  if ("Forces" %in% allparams$parameter){
+    for (i in allparams$subparameter[allparams$parameter == "Forces"]){
+      #force <- force + (object@SWdist[,i]*allparams$value[allparams$subparameter == i])
+      mF<-cbind(mF,(object@SWdist[,i]*allparams$value[allparams$subparameter == i]))
+      colnames(mF)[ncol(mF)]<-i
+    }
+  }
+  
+  # Zeitgeber force
+  if ("SinForce" %in% allparams$parameter){
+    amp<-allparams$value[allparams$subparameter == "AmpSin"]
+    phi<-allparams$value[allparams$subparameter == "PhiSin"]
+    per<-allparams$value[allparams$subparameter == "PerSin"]
+    #force <- force + amp * sin(2*pi/per * time + phi) 
+    mF<-cbind(mF,amp * sin(2*pi/per * time + phi) )
+    colnames(mF)[ncol(mF)]<-"SinF"
+  }
+  
+  # Inner force by string constant
+  out <- SWDMr::SWDMrFit(object,params)
+  k<-allparams[allparams$subparameter == "omega","value"]^2
+  pos<-out$y1[-1]-allparams[allparams$subparameter == "intercept","value"]
+  mF<-cbind(mF,pos*k)
+  colnames(mF)[ncol(mF)]<-"FstringConst"
+  
+  # Inner force by damping constant
+  mF<-cbind(mF,out$y2[-1]*exp(allparams[allparams$subparameter == "loggamma","value"]))
+  colnames(mF)[ncol(mF)]<-"Fdamp"
+  
+  return(as.data.frame(mF))
+  
+})
