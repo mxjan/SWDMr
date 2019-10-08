@@ -503,8 +503,8 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
     lm_flat<-lm(GeneExp~1)
     RSS_flat<-sum(resid(lm_flat)^2)
     var_flat<-RSS_flat/n
-    NLL_flat<- -1* ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS/(2*var_flat))
-    BIC_flat <- -2*(-NLL)+(1+1)*log(n)
+    NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
+    BIC_flat <- -2*(-NLL_flat)+(1+1)*log(n)
     BF_DDHOvFlat<-exp((BIC-BIC_flat)/2)
     
     
