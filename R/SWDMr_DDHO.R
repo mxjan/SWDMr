@@ -416,8 +416,8 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
   evaldaytimemin<-evaldaytime + modultimeminv
   evaldaytimemax<-evaldaytime + modultimemaxv
   
-  obsmin<-fitted$y1[fitted$time %in% evaldaytimemin]
-  obsmax<-fitted$y1[fitted$time %in% evaldaytimemax]
+  obsmin<-fitted$y1[sapply(evaldaytimemin,function(x) which.min(abs(fitted$time-x)))]
+  obsmax<-fitted$y1[sapply(evaldaytimemax,function(x) which.min(abs(fitted$time-x)))]
   obs<-c(obsmin,obsmax )
   pred<-c(rep(min(sodeinterval),length(obsmin)),rep(max(sodeinterval),length(obsmax)))
   
@@ -505,7 +505,7 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
     var_flat<-RSS_flat/n
     NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
     BIC_flat <- -2*(-NLL_flat)+(1+1)*log(n)
-    BF_DDHOvFlat<-exp((BIC-BIC_flat)/2)
+    BF_DDHOvFlat<-exp((BIC_flat-BIC)/2)
     
     
     return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,

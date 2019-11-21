@@ -67,7 +67,7 @@ swdmr
 Initiate a Driven Damped Harmonic Oscillator [DDHO] model for a gene
 
 ```{r}
-Gene<-"Nr1d1"
+Gene<-"Acot11"
 model<-initDDHOmodel(swdmr,VarExp = Gene)
 ```
 
@@ -84,15 +84,14 @@ model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
 model<-AddForce(model,"Sleep")
 
-
 # Start is set at intercept with speed of 0
 model<-SetYinitMode(model,mode = "Intercept_0",values = c(0,48))
 # We replicate baseline for 20 day
-model<-ReplicateDrivingForce(model,c(0.1,24.0),20)
+model<-ReplicateDrivingForce(model,c(0.1,24.0),40)
 # A sin-wave force is applied with a period of 24h
 model<-AddSinF(model,FixPer = 24)
 # Compute the fit using RSS
-model<-SetFittingValue(model,value = "RSS")
+model<-SetFittingValue(model,value = "NLL")
 # Penalize the fitting for unstable value for 10 replicated days
 model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,48), StabilityDayCheck = 10)
 
@@ -111,13 +110,30 @@ Fit data with optimx
 # Get objective function
 objfun<-SWDMrGetEvalFun(model)
 # Limits of the model
-params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=1e-2,PhiSin=2.5)
-lower<-c(Wake=-Inf,Sleep=-Inf,loggamma=-Inf,omega=2*pi/30,AmpSin=0,PhiSin=0)
+params<-c(Wake=.1,Sleep=.1,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=1e-2,PhiSin=3.6)
+lower<-c(Wake=-Inf,Sleep=-Inf,loggamma=-Inf,omega=2*pi/36,AmpSin=0,PhiSin=0)
 upper<-c(Wake=Inf,Sleep=Inf,loggamma=Inf,omega=2*pi/18,AmpSin=Inf,PhiSin=2*pi)
 
+optimxresAll<-optimx(params,objfun,control=list(all.methods=T,save.failures=T,maxit=2500))
+optimxresAll
+optimxres<-optimxresAll["nlminb",]
+
+# objfun2<-function(params){
+#   print(params)
+#   res<-try(V<-objfun(params))
+#   if (class(res) == "try-error"){V<-200}else{print(V)}
+#   return(V)
+# }
+# 
+# optim(params,objfun2,method="SANN",control = list(maxit = 20000, temp = 2,trace=100,REPORT=1,tmax=100))
+
 # Fit
-optimxres<-optimx(params,objfun,method=c("nlminb"),lower = lower,upper=upper)
-optimxres
+#optimxres<-optimx(params,objfun,method=c("nlminb"),lower = lower,upper=upper)
+# optimxres<-optimx(params,objfun,method=c("bobyqa"),lower = lower,upper=upper)
+#optimxres<-optimx(params,objfun,method=c("newuoa"))
+# optimxres<-optimx(params,objfun,method=c("nlminb"))
+# 
+# optimxres
 ```
 
 
@@ -142,6 +158,14 @@ Plot fit and gene expression using ggplot2
 SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
 
+```{r}
+Fmod<-SWDMr:::AllForceApplied(model,optimxres)
+sumF<-apply(abs(Fmod[,seq(2,6)]),1,sum)
+Fmod[,seq(2,6)]<-abs(Fmod[,seq(2,6)])/sumF
+apply(Fmod[Fmod$Time>0,],2,mean)
+```
+
+# Empirical bootstrap
 
 Compute confidence interval using empirical bootstrap
 
@@ -173,7 +197,8 @@ EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 
     n<-length(model2@Gexp[,1])
     model2@Gexp[,1]<- predval + sqrt(stats[["ErrorVariance"]])*rnorm(n)
     objfunboot<-SWDMrGetEvalFun(model2)
-    optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"),lower = lower,upper=upper)
+    #optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"),lower = lower,upper=upper)
+    optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"))
     
     return(as.numeric(optimxresboot[1,names(params)]))
   }
@@ -234,6 +259,18 @@ pctFmod[,seq(2,5)]<-abs(pctFmod[,seq(2,5)])/sumF
 head(pctFmod)
 apply(pctFmod[pctFmod$Time>0,],2,mean)
 ```
+
+```{r}
+paramsn<-optimxres[1,]
+#paramsn["Wake"]<-0
+paramsn["Sleep"]<-0
+#paramsn["AmpSin"]<-0
+outn<-SWDMrFit(model,params = paramsn)
+plot(out$time,out$y1,type="l",ylab="Position",xlab="Time",xlim=c(-24,144))
+lines(outn$time,outn$y1,col="red")
+```
+
+
 
 ```{r}
 sessionInfo()
