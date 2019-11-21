@@ -113,15 +113,14 @@ model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
 model<-AddForce(model,"Sleep")
 
-
 # Start is set at intercept with speed of 0
 model<-SetYinitMode(model,mode = "Intercept_0",values = c(0,48))
 # We replicate baseline for 20 day
-model<-ReplicateDrivingForce(model,c(0.1,24.0),20)
+model<-ReplicateDrivingForce(model,c(0.1,24.0),40)
 # A sin-wave force is applied with a period of 24h
 model<-AddSinF(model,FixPer = 24)
 # Compute the fit using RSS
-model<-SetFittingValue(model,value = "RSS")
+model<-SetFittingValue(model,value = "NLL")
 # Penalize the fitting for unstable value for 10 replicated days
 model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,48), StabilityDayCheck = 10)
 ```
@@ -155,19 +154,17 @@ Fit data with optimx
 # Get objective function
 objfun<-SWDMrGetEvalFun(model)
 # Limits of the model
-params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=1e-2,PhiSin=2.5)
-lower<-c(Wake=-Inf,Sleep=-Inf,loggamma=-Inf,omega=2*pi/30,AmpSin=0,PhiSin=0)
-upper<-c(Wake=Inf,Sleep=Inf,loggamma=Inf,omega=2*pi/18,AmpSin=Inf,PhiSin=2*pi)
+params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=0,PhiSin=pi)
 
 # Fit
-optimxres<-optimx(params,objfun,method=c("nlminb"),lower = lower,upper=upper)
+optimxres<-optimx(params,objfun,method=c("nlminb"))
 optimxres
 ```
 
-    ##              Wake     Sleep loggamma     omega      AmpSin   PhiSin
-    ## nlminb -0.1338645 0.2065329 -3.63269 0.2437751 0.008298693 2.665784
-    ##           value fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb 1.545931     63    276    41        0 TRUE TRUE  0.61
+    ##              Wake     Sleep  loggamma    omega      AmpSin  PhiSin
+    ## nlminb -0.1342697 0.2071016 -3.623463 0.243785 0.008296072 2.66353
+    ##            value fevals gevals niter convcode kkt1  kkt2 xtime
+    ## nlminb -40.31794     84    295    43        0 TRUE FALSE  1.09
 
 Get fit
 
@@ -180,16 +177,16 @@ plot(out$time,out$y2,type="l",ylab="Speed",xlab="Time")
 
 ![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-Get some statistics for the fit
+Get some statistics for the fit (R2, and AdjR2 are not valid measure ! Do not use them !)
 
 ``` r
 SWDMrStats(model,out,detailed = T)
 ```
 
-    ##   Variable     RSS       NLL      BIC BIC_flat  BayesFactor       AIC
-    ## 1    Nr1d1 1.54593 -21.05178 -13.9261 46.52304 7.475457e-14 -187.0247
+    ##   Variable      RSS       NLL       BIC BIC_flat  BayesFactor       AIC
+    ## 1    Nr1d1 1.546095 -21.04878 -13.92009 46.52304 1.333699e+13 -187.0187
     ##          R2     AdjR2    Fstat       pvalF numdf rdf  n k ErrorVariance
-    ## 1 0.7628008 0.7390809 32.15866 1.64313e-14     5  50 56 6    0.02760588
+    ## 1 0.7627754 0.7390529 32.15415 1.64313e-14     5  50 56 6    0.02760885
 
 Plot fit and gene expression using ggplot2
 
@@ -198,6 +195,23 @@ SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
 
 ![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
+
+Mean force applied by each force on the oscillator
+
+``` r
+Fmod<-SWDMr:::AllForceApplied(model,optimxres)
+sumF<-apply(abs(Fmod[,seq(2,6)]),1,sum)
+Fmod[,seq(2,6)]<-abs(Fmod[,seq(2,6)])/sumF
+apply(Fmod[Fmod$Time>0,],2,mean)
+```
+
+    ##         Time         Wake        Sleep         SinF FstringConst 
+    ##  60.05000000   0.21903359   0.24644419   0.13763444   0.34590713 
+    ##        Fdamp 
+    ##   0.05098063
+
+Empirical bootstrap
+===================
 
 Compute confidence interval using empirical bootstrap
 
@@ -229,7 +243,8 @@ EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 
     n<-length(model2@Gexp[,1])
     model2@Gexp[,1]<- predval + sqrt(stats[["ErrorVariance"]])*rnorm(n)
     objfunboot<-SWDMrGetEvalFun(model2)
-    optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"),lower = lower,upper=upper)
+    #optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"),lower = lower,upper=upper)
+    optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"))
     
     return(as.numeric(optimxresboot[1,names(params)]))
   }
@@ -267,30 +282,26 @@ EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 
 
   return(list(B=B,Y=Y,F=F,CI=ci.mc,Est.pvals=Est.pvals,df.mc=df.mc))
 }
+```
 
-EmpBootres<-EmpBoot(model,optimxres,params,upper,lower,nboot=100)
+Confidence intervals
+
+``` r
+EmpBootres<-EmpBoot(model,optimxres,params,upper,lower,nboot=200)
 EmpBootres$CI
 ```
 
-    ##                 2.5%       97.5%
-    ## Wake     -0.24219532 -0.09455252
-    ## Sleep     0.14951609  0.32472725
-    ## loggamma -4.22821840 -2.74486673
-    ## omega     0.23503532  0.25340632
-    ## AmpSin    0.00630117  0.01035181
-    ## PhiSin    2.32597939  2.97287549
+    ##                  2.5%       97.5%
+    ## Wake     -0.227014007 -0.08296958
+    ## Sleep     0.139868370  0.31326177
+    ## loggamma -4.821498815 -2.70022502
+    ## omega     0.232900804  0.25744868
+    ## AmpSin    0.005624625  0.01092733
+    ## PhiSin    2.254397922  2.98233522
 
 ``` r
-EmpBootres$Est.pvals
+#EmpBootres$Est.pvals
 ```
-
-    ##              Estimate          SE     Tstat      p.value
-    ## Wake     -0.133864464 0.038961462 -3.435817 1.182974e-03
-    ## Sleep     0.206532924 0.046494522  4.442092 4.807501e-05
-    ## loggamma -3.632690235 0.423803002 -8.571648 1.877543e-11
-    ## omega     0.243775139 0.004983053 48.920844 0.000000e+00
-    ## AmpSin    0.008298693 0.001135900  7.305833 1.790384e-09
-    ## PhiSin    2.665783946 0.167902374 15.876988 0.000000e+00
 
 ``` r
 p<-SWDMr:::StandardFittingPlot(model,optimxres[1,])
@@ -299,34 +310,7 @@ p <- p + annotate("ribbon",x=EmpBootres$df.mc$Time, ymin=EmpBootres$df.mc$lwr.co
 p
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-13-1.png)
-
-``` r
-#Mean Force applied
-
-Fmod<-SWDMr:::AllForceApplied(model,optimxres[1,])
-pctFmod<-Fmod
-sumF<-apply(abs(pctFmod[,seq(2,5)]),1,sum)
-pctFmod[,seq(2,5)]<-abs(pctFmod[,seq(2,5)])/sumF
-head(pctFmod)
-```
-
-    ##     Time      Wake     Sleep      SinF FstringConst        Fdamp
-    ## 1 -479.9 0.4536661 0.3610213 0.1852851 2.750075e-05 4.762287e-06
-    ## 2 -479.8 0.4133653 0.4130123 0.1734895 1.329944e-04 1.373346e-05
-    ## 3 -479.7 0.3700768 0.4680347 0.1615250 3.635297e-04 2.730707e-05
-    ## 4 -479.6 0.3129342 0.5376112 0.1486841 7.705054e-04 4.716335e-05
-    ## 5 -479.5 0.2164140 0.6486834 0.1334894 1.413160e-03 7.838720e-05
-    ## 6 -479.4 0.1386800 0.7389431 0.1199814 2.395454e-03 1.193020e-04
-
-``` r
-apply(pctFmod[pctFmod$Time>0,],2,mean)
-```
-
-    ##         Time         Wake        Sleep         SinF FstringConst 
-    ## 6.005000e+01 2.336547e-01 2.591884e-01 1.444320e-01 3.627249e-01 
-    ##        Fdamp 
-    ## 6.060075e-05
+![](README_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
 ``` r
 sessionInfo()

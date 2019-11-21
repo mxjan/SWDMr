@@ -67,7 +67,7 @@ swdmr
 Initiate a Driven Damped Harmonic Oscillator [DDHO] model for a gene
 
 ```{r}
-Gene<-"Acot11"
+Gene<-"Nr1d1"
 model<-initDDHOmodel(swdmr,VarExp = Gene)
 ```
 
@@ -110,30 +110,11 @@ Fit data with optimx
 # Get objective function
 objfun<-SWDMrGetEvalFun(model)
 # Limits of the model
-params<-c(Wake=.1,Sleep=.1,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=1e-2,PhiSin=3.6)
-lower<-c(Wake=-Inf,Sleep=-Inf,loggamma=-Inf,omega=2*pi/36,AmpSin=0,PhiSin=0)
-upper<-c(Wake=Inf,Sleep=Inf,loggamma=Inf,omega=2*pi/18,AmpSin=Inf,PhiSin=2*pi)
-
-optimxresAll<-optimx(params,objfun,control=list(all.methods=T,save.failures=T,maxit=2500))
-optimxresAll
-optimxres<-optimxresAll["nlminb",]
-
-# objfun2<-function(params){
-#   print(params)
-#   res<-try(V<-objfun(params))
-#   if (class(res) == "try-error"){V<-200}else{print(V)}
-#   return(V)
-# }
-# 
-# optim(params,objfun2,method="SANN",control = list(maxit = 20000, temp = 2,trace=100,REPORT=1,tmax=100))
+params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/23.8,AmpSin=0,PhiSin=pi)
 
 # Fit
-#optimxres<-optimx(params,objfun,method=c("nlminb"),lower = lower,upper=upper)
-# optimxres<-optimx(params,objfun,method=c("bobyqa"),lower = lower,upper=upper)
-#optimxres<-optimx(params,objfun,method=c("newuoa"))
-# optimxres<-optimx(params,objfun,method=c("nlminb"))
-# 
-# optimxres
+optimxres<-optimx(params,objfun,method=c("nlminb"))
+optimxres
 ```
 
 
@@ -146,7 +127,7 @@ plot(out$time,out$y1,type="l",ylab="Position",xlab="Time")
 plot(out$time,out$y2,type="l",ylab="Speed",xlab="Time")
 ```
 
-Get some statistics for the fit
+Get some statistics for the fit (R2, and AdjR2 are not valid measure ! Do not use them !)
 
 ```{r}
 SWDMrStats(model,out,detailed = T)
@@ -157,6 +138,8 @@ Plot fit and gene expression using ggplot2
 ```{r}
 SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
+
+Mean force applied by each force on the oscillator
 
 ```{r}
 Fmod<-SWDMr:::AllForceApplied(model,optimxres)
@@ -236,11 +219,17 @@ EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 
 
   return(list(B=B,Y=Y,F=F,CI=ci.mc,Est.pvals=Est.pvals,df.mc=df.mc))
 }
-
-EmpBootres<-EmpBoot(model,optimxres,params,upper,lower,nboot=100)
-EmpBootres$CI
-EmpBootres$Est.pvals
 ```
+
+Confidence intervals
+
+```{r}
+EmpBootres<-EmpBoot(model,optimxres,params,upper,lower,nboot=200)
+EmpBootres$CI
+#EmpBootres$Est.pvals
+```
+
+
 
 ```{r}
 p<-SWDMr:::StandardFittingPlot(model,optimxres[1,])
@@ -248,28 +237,6 @@ p <- p + annotate("ribbon",x=EmpBootres$df.mc$Time, ymin=EmpBootres$df.mc$lwr.pr
 p <- p + annotate("ribbon",x=EmpBootres$df.mc$Time, ymin=EmpBootres$df.mc$lwr.conf, ymax=EmpBootres$df.mc$upr.conf, alpha=0.4, fill="#339900")
 p
 ```
-
-```{r}
-#Mean Force applied
-
-Fmod<-SWDMr:::AllForceApplied(model,optimxres[1,])
-pctFmod<-Fmod
-sumF<-apply(abs(pctFmod[,seq(2,5)]),1,sum)
-pctFmod[,seq(2,5)]<-abs(pctFmod[,seq(2,5)])/sumF
-head(pctFmod)
-apply(pctFmod[pctFmod$Time>0,],2,mean)
-```
-
-```{r}
-paramsn<-optimxres[1,]
-#paramsn["Wake"]<-0
-paramsn["Sleep"]<-0
-#paramsn["AmpSin"]<-0
-outn<-SWDMrFit(model,params = paramsn)
-plot(out$time,out$y1,type="l",ylab="Position",xlab="Time",xlim=c(-24,144))
-lines(outn$time,outn$y1,col="red")
-```
-
 
 
 ```{r}
