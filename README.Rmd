@@ -25,7 +25,7 @@ Sleep-wake data per hour
 ```{r}
 # Data
 # ****** Prepare Sleep-Wake data ****** 
-files <- list.files(path="../data/Sleep_States/",pattern = paste("^","BL6",sep=""),full.names = T)
+files <- list.files(path="../Data/BXD_SleepWake_SDMJ2018/",pattern = paste("^","BL6",sep=""),full.names = T)
 SWdf<-Read_SW(files,concattimesec = 360) # 300 = 5min, 180 = 3 min, 360 = 6min
 SWdf<-SWdf_AddLD(SWdf) # Add Light and Dark
 SWdf<-SWdf_DayMerging(SWdf,Daysformat=list(c(1,2),c(1,2),3,4,c(1,2)),concattimesec=360)
@@ -38,9 +38,9 @@ Explained variable is gene expression
 ```{r}
 # ***** Prepare Gene expression data ******
 # Gene expression
-load("../data/CHor2018_TimeCourse_NormalizedData_Genes.RData")
+load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/CHN2019_TimeCourse_NormalizedData_Genes.RData")
 # Meta data
-load("../data/CHor2018_TimeCourse_MetaData.RData")
+load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/CHN2019_TimeCourse_MetaData.RData")
 # Remove data sampled 7days after SD
 rna_expr<-rna_expr[,rna_meta$time<100]
 rna_meta<-rna_meta[rna_meta$time<100,]
@@ -67,7 +67,7 @@ swdmr
 Initiate a Driven Damped Harmonic Oscillator [DDHO] model for a gene
 
 ```{r}
-Gene<-"Nr1d1"
+Gene<-"Npas2"
 model<-initDDHOmodel(swdmr,VarExp = Gene)
 ```
 
@@ -147,6 +147,15 @@ sumF<-apply(abs(Fmod[,seq(2,6)]),1,sum)
 Fmod[,seq(2,6)]<-abs(Fmod[,seq(2,6)])/sumF
 apply(Fmod[Fmod$Time>0,],2,mean)
 ```
+
+```{r}
+optimx2<-optimxres[1,]
+optimx2["AmpSin"]<-0
+SWDMr:::StandardFittingPlot(model,optimx2)
+```
+
+
+
 
 # Empirical bootstrap
 

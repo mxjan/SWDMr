@@ -349,8 +349,10 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   gamma<-exp(allparams$value[gamma_idx])
   
   # Initial position
-  if (object@initmod == "Fixed" || object@initmod == "CircadianFit" || object@initmod == "Free"){y.init = c(object@initpos-intercept, object@initspeed)}
+  if (object@initmod == "Fixed" || object@initmod == "CircadianFit"){y.init = c(object@initpos-intercept, object@initspeed)}
   if (object@initmod == "Intercept_0"){y.init = c(0, 0)}
+  if (object@initmod == "Free"){y.init = c(as.numeric(params["start_pos"]),as.numeric(params["start_speed"]))}
+  
   
   # Sum forces
   force<-SumForces(object,params,allparams)
