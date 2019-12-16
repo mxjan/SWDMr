@@ -411,12 +411,9 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
   modultimeminv<-fitted$time[interval_eval][idxminv] %% 24
   modultimemaxv<-fitted$time[interval_eval][idxmaxv] %% 24
   
-  
-  interval_eval_obs<-fitted$time >= object@PredictedValueInterval[1]-(object@StabilityDayCheck*24) & fitted$time <= object@PredictedValueInterval[1]
-  evaldaytime<-cumsum(c(object@PredictedValueInterval[1]-24,rep(-24,object@StabilityDayCheck)))
-  
-  evaldaytimemin<-evaldaytime + modultimeminv
-  evaldaytimemax<-evaldaytime + modultimemaxv
+  evaldaytimemin<-cumsum(c(modultimeminv-24,rep(-24,object@StabilityDayCheck)))
+  evaldaytimemax<-cumsum(c(modultimemaxv-24,rep(-24,object@StabilityDayCheck)))
+
   
   obsmin<-fitted$y1[sapply(evaldaytimemin,function(x) which.min(abs(fitted$time-x)))]
   obsmax<-fitted$y1[sapply(evaldaytimemax,function(x) which.min(abs(fitted$time-x)))]
