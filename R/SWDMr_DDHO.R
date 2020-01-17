@@ -444,7 +444,7 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
   predv<-approxfun(fitted$time,fitted$y1)
   predval<-predv(object@Gexp$Time)
   
-  idx<- ! is.na(predval)
+  idx<- ! is.na(predval) & ! is.na(object@Gexp[,object@VarExp])
   
   GeneExp<-object@Gexp[idx,object@VarExp]
   predval<-predval[idx]
