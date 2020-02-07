@@ -48,7 +48,7 @@ SWDMr <- function(SWdist,Gexp,verbose=1){
 #' model<-ReplicateDrivingForce(model,c(0,24),20)
 #' # Then we control that the last 10 replicated day have similar min and max value compared to true baseline
 #' model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
-setGeneric("PenalizeUnstableFit", function(object,value = T,PredictedValueInterval,StabilityDayCheck,weight)
+setGeneric("PenalizeUnstableFit", function(object,value = T,PredictedValueInterval,StabilityDayCheck,weight=1)
   standardGeneric("PenalizeUnstableFit") )
 
 

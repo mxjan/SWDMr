@@ -10,7 +10,7 @@ PenalizeUnstableFit(
   value = T,
   PredictedValueInterval,
   StabilityDayCheck,
-  weight
+  weight = 1
 )
 }
 \arguments{
