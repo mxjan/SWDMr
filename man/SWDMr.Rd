@@ -24,6 +24,7 @@ Sleep-Wake Driven Model with R package [SWDMr] using sleep-wake data and explain
 \details{
 The following model are implemented:
 
+
 Driven Damped Harmonic Oscillator [DDHO]
 }
 \examples{

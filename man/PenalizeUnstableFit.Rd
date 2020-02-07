@@ -5,8 +5,12 @@
 \alias{PenalizeUnstableFit}
 \title{Unstable Fit penalization}
 \usage{
-PenalizeUnstableFit(object, value = T, PredictedValueInterval,
-  StabilityDayCheck)
+PenalizeUnstableFit(
+  object,
+  value = T,
+  PredictedValueInterval,
+  StabilityDayCheck
+)
 }
 \arguments{
 \item{object}{An SWDMr_DDHO object}

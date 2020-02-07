@@ -4,8 +4,13 @@
 \alias{Read_SW}
 \title{Create a dataframe with Sleep-wake distribution, Time and Day}
 \usage{
-Read_SW(files, concat = "mean", nepochs = 86400, epochlengthsec = 4,
-  concattimesec = 300)
+Read_SW(
+  files,
+  concat = "mean",
+  nepochs = 86400,
+  epochlengthsec = 4,
+  concattimesec = 300
+)
 }
 \arguments{
 \item{concat}{character [mean or median]}

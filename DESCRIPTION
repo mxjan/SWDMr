@@ -9,4 +9,4 @@ Description: Sleep-Wake driven oscillator model.
 License: CC-BY
 Imports: Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

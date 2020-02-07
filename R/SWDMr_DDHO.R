@@ -398,7 +398,7 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   
 })
 
-setGeneric("AddUnstableFitPenalization",  function(object,fitted,FittingValue,val,var)
+setGeneric("AddUnstableFitPenalization",  function(object,fitted,FittingValue,val,var,weight=1)
   standardGeneric("AddUnstableFitPenalization") )
 setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fitted,FittingValue,val,var){
   
@@ -421,18 +421,18 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
   pred<-c(rep(min(sodeinterval),length(obsmin)),rep(max(sodeinterval),length(obsmax)))
   
   if (FittingValue == "RSS"){
-    return(val+sum((pred-obs)^2))
+    return(val+sum((pred-obs)^2)*weight)
   }
   if (FittingValue == "NLL"){
     # transform in LL
     val <- -val
     # Add likelihood
-    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))
+    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))*weight
     # Return NLL
     return(-val)
   }
   if (FittingValue == "LL"){
-    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))
+    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))*weight
     return(val)
   }
 })
