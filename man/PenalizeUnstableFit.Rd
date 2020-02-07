@@ -9,7 +9,8 @@ PenalizeUnstableFit(
   object,
   value = T,
   PredictedValueInterval,
-  StabilityDayCheck
+  StabilityDayCheck,
+  weight
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ PenalizeUnstableFit(
 \item{PredictedValueInterval}{A two value vector for min and max value observed}
 
 \item{StabilityDayCheck}{The number of day control for similiar min and max value compared to PredictedValueInterval}
+
+\item{weight}{Weight applied on unstable points}
 }
 \description{
 Penalize the fit that are unstable through replicated points

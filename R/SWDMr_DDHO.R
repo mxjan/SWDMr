@@ -31,6 +31,7 @@ setClass(
     PenalizeUnstableFit = "logical",
     PredictedValueInterval = "numeric",
     StabilityDayCheck = "numeric",
+    PenalizeUnstableFitWeight = "numeric",
     
     
     FittingValue = "character",
@@ -293,7 +294,7 @@ setMethod("SetFittingValue",signature="SWDMr_DDHO", function(object,value = "RSS
 })
 
 
-setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = T,PredictedValueInterval,StabilityDayCheck){
+setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = T,PredictedValueInterval,StabilityDayCheck,weight=1){
   
   # Set penalization to True
   object@PenalizeUnstableFit<-T
@@ -302,6 +303,8 @@ setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = 
   object@PredictedValueInterval<-PredictedValueInterval
   
   object@StabilityDayCheck<-StabilityDayCheck
+  
+  object@PenalizeUnstableFitWeight<-weight
   
   return(object)
 })
@@ -400,7 +403,12 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
 
 setGeneric("AddUnstableFitPenalization",  function(object,fitted,FittingValue,val,var,weight=1)
   standardGeneric("AddUnstableFitPenalization") )
-setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fitted,FittingValue,val,var){
+setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fitted,FittingValue,val,var,weight=1){
+  
+  # Weight
+  if (object@PenalizeUnstableFitWeight != 1){
+    weight<-object@PenalizeUnstableFitWeight
+  }
   
   # Get min and max in intervals
   interval_eval<-fitted$time >= object@PredictedValueInterval[1] & fitted$time <= object@PredictedValueInterval[2]

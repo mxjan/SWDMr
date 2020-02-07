@@ -40,6 +40,7 @@ SWDMr <- function(SWdist,Gexp,verbose=1){
 #' @param value Set the penalization method (TRUE or FALSE)
 #' @param PredictedValueInterval A two value vector for min and max value observed
 #' @param StabilityDayCheck The number of day control for similiar min and max value compared to PredictedValueInterval
+#' @param weight Weight applied on unstable points
 #' @export
 #' @docType methods
 #' @examples
@@ -47,7 +48,7 @@ SWDMr <- function(SWdist,Gexp,verbose=1){
 #' model<-ReplicateDrivingForce(model,c(0,24),20)
 #' # Then we control that the last 10 replicated day have similar min and max value compared to true baseline
 #' model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,24), StabilityDayCheck = 10)
-setGeneric("PenalizeUnstableFit", function(object,value = T,PredictedValueInterval,StabilityDayCheck)
+setGeneric("PenalizeUnstableFit", function(object,value = T,PredictedValueInterval,StabilityDayCheck,weight)
   standardGeneric("PenalizeUnstableFit") )
 
 
