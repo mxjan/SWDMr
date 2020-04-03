@@ -4,6 +4,7 @@
 #'
 #' @param object A SWDMr object 
 #' @param VarExp The name of the variable to explain by the model
+#' @param UseDampingRatio The core parameters of the model change for intercept, damping ratio and natural frequency instead of intercept, damping constant and natural frequency
 #' 
 #' @return SWDMr model object
 #'
@@ -11,8 +12,11 @@
 #' model <- initDDHOmodel(swdmr,VarExp = "Arntl")
 #'
 #'@export
-initDDHOmodel<-function(object,VarExp){
-  new(Class = "SWDMr_DDHO", SWdist = object@SWdist, Gexp = object@Gexp[c(VarExp,"Time")],VarExp = VarExp)
+initDDHOmodel<-function(object,VarExp, UseDampingRatio = F){
+  new(Class = "SWDMr_DDHO", SWdist = object@SWdist, 
+      Gexp = object@Gexp[c(VarExp,"Time")],
+      VarExp = VarExp,
+      UseDampingRatio = UseDampingRatio)
 }
 
 #' Create a SWDMr object

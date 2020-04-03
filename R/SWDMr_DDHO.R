@@ -9,31 +9,41 @@ setClass(
   # Define the slots
   representation = representation(
     
+    # Name of variable explained
     VarExp = "character",
     
-    intercept = "numeric",
-    omega = "numeric",
-    loggamma = "numeric",
+    # Core parameters of damped oscillator
+    intercept = "numeric", # intercept of the model (0 position of the oscillator)
+    omega = "numeric", # natural frequency 
+    loggamma = "numeric", # damping constant (in log as it is easier to optimize with derivative free method)
+    ## Use damping ration for optimization
+    UseDampingRatio = "logical", # If True, then use only omega and get loggamma = log(dampratio/2*omega)
+    dampratio = "numeric", # damping ration (gamma/2*omega), > 1 = overdamping, 1 = critical damping,  < 1 = underdamnping
     
-    Forces = "list",
+    # List of forces applied to the model
+    Forces = "list", 
     
+    # List of additive effects applied to the model
     AddEffects = "list",
     
-    SinForce = "logical",
-    AmpSin = "numeric",
-    PhiSin = "numeric",
-    PerSin = "numeric",
+    # A second force added (True or False) in the form of a sin-wave 
+    SinForce = "logical", # T || F
+    AmpSin = "numeric", # Amplitude
+    PhiSin = "numeric", # Phase
+    PerSin = "numeric", # Period
     
+    # How the initial value of position and speed are calculated
     initmod = "character",
-    initpos = "numeric",
-    initspeed = "numeric",
+    initpos = "numeric", # position
+    initspeed = "numeric", # speed
     
+    # The fit is penalized for unstable fit
     PenalizeUnstableFit = "logical",
     PredictedValueInterval = "numeric",
     StabilityDayCheck = "numeric",
     PenalizeUnstableFitWeight = "numeric",
     
-    
+    # Objective function is optimized for FitttingValue, can be RSS or Negative Log Likelihood (NLL)
     FittingValue = "character",
     
     verbose = "numeric"
@@ -73,7 +83,12 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object) {
   #fixedparams<-data.frame(parameter = character(0),subparameter=character(0),value=numeric(0),stringsAsFactors = F)
   
   # Core params
-  for (param in c("intercept","omega","loggamma")){
+  if (object@UseDampingRatio == T){
+    CoreParams<-c("intercept","omega","dampratio")
+  }else{
+    CoreParams<-c("intercept","omega","loggamma")
+  }
+  for (param in CoreParams){
     if ( length(slot(object,param)) == 0){
       #freeparams<-rbind(freeparams,data.frame(parameter="Core parameter",subparameter=param,value=NA,stringsAsFactors = F))
       freeparams<-rbind(freeparams,c("Core parameter",param,NA))
@@ -348,8 +363,14 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   omega_idx<-which(allparams$subparameter == "omega")
   omega<-allparams$value[omega_idx]
   
-  gamma_idx<-which(allparams$subparameter == "loggamma")
-  gamma<-exp(allparams$value[gamma_idx])
+  if (object@UseDampingRatio == F){
+    gamma_idx<-which(allparams$subparameter == "loggamma")
+    gamma<-exp(allparams$value[gamma_idx])
+  }else{
+    dampratio_idx<-which(allparams$subparameter == "dampratio")
+    gamma <- allparams$value[dampratio_idx] / (2*allparams$value[omega_idx])
+  }
+
   
   # Initial position
   if (object@initmod == "Fixed" || object@initmod == "CircadianFit"){y.init = c(object@initpos-intercept, object@initspeed)}
