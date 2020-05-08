@@ -1,7 +1,7 @@
 Package: SWDMr
 Type: Package
 Title: Sleep-Wake driven model
-Version: 1.0
+Version: 1.1
 Date: 2019-07-19
 Author: Maxime Jan
 Maintainer: Maxime Jan <maxime.jan@unil.ch>

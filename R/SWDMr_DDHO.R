@@ -499,46 +499,78 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
       }
     }
   }else{
+    
+    # N parameters
     k <- nrow(GetFreeFixedParams(object)$FreeParams)
-    
-    
-    # R2 NOT VALID FOR NON LINEAR MODELS ! DOES NOT ADD UP TO 100 !!
-    # https://statisticsbyjim.com/regression/r-squared-invalid-nonlinear-regression/
-    # Use Standard Error of regression https://statisticsbyjim.com/regression/standard-error-regression-vs-r-squared/
-    # SEE SOME STATS HERE: http://sia.webpopix.org/nonlinearRegression.html
-    # See Note on the R2 measure of goodness of fit for nonlinear models (TARALD O. KVALSETH, 1983)
-    RSS<-sum((GeneExp-predval)^2)
-    MSS<-sum((predval - mean(predval))^2)
-    R2<-MSS/(MSS+RSS)
-    
-    rdf<-n-k
-    AdjR2<- 1 - (1-R2) * ((n - 1)/rdf)
-    
-    resvar <- RSS/rdf
-    Fstat<-(MSS/(k - 1))/resvar
-    pvalF<-1-pf(Fstat,k-1,rdf)
-
+    # residuals
+    residualsV<-(GeneExp-predval)
+    # Residuals sum of square
+    RSS<-sum(residualsV^2)
+    # Variance
     var<-RSS/n
+    # Negative Log Likelihood
     NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
-    # Faster ?
-    #((-n/2)*log(2*pi)) - ((n/2)*log(sigma2)) - (RSS/(2*var))
+    # Bayesian Information Criterion
+    BIC <- -2*(-NLL)+(k)*log(n)
+    # Akaike information criterion
+    AIC <- 2*(k) + n*log(RSS/n)
     
-    
-    BIC <- -2*(-NLL)+(k+1)*log(n) # add variance as parameter
-    AIC <- 2*(k+1) + n*log(RSS/n)
-    
-    # Flat model
+    # FLAT MODEL
     lm_flat<-lm(GeneExp~1)
     RSS_flat<-sum(resid(lm_flat)^2)
     var_flat<-RSS_flat/n
     NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
-    BIC_flat <- -2*(-NLL_flat)+(1+1)*log(n)
+    BIC_flat <- -2*(-NLL_flat)+(1)*log(n)
+    
+    # Bayes Factor
     BF_DDHOvFlat<-exp((BIC_flat-BIC)/2)
     
+    # Kendal Tau
+    KendalTau<-cor(GeneExp,predval,method="kendall")
     
-    return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,
+    return(list(stats = as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,
                               BIC=BIC,BIC_flat=BIC_flat,BayesFactor=BF_DDHOvFlat,
-                              AIC=AIC,R2=R2,AdjR2=AdjR2,Fstat=Fstat,pvalF=pvalF,numdf=k-1,rdf=rdf,n=n,k=k,ErrorVariance=var)))
+                              AIC=AIC,n=n,k=k,ErrorVariance=var, KendalTau = KendalTau)), residuals = residualsV, fitted = predval ))
+    
+    
+    # k <- nrow(GetFreeFixedParams(object)$FreeParams)
+    # 
+    # # R2 NOT VALID FOR NON LINEAR MODELS ! DOES NOT ADD UP TO 100 !!
+    # # https://statisticsbyjim.com/regression/r-squared-invalid-nonlinear-regression/
+    # # Use Standard Error of regression https://statisticsbyjim.com/regression/standard-error-regression-vs-r-squared/
+    # # SEE SOME STATS HERE: http://sia.webpopix.org/nonlinearRegression.html
+    # # See Note on the R2 measure of goodness of fit for nonlinear models (TARALD O. KVALSETH, 1983)
+    # RSS<-sum((GeneExp-predval)^2)
+    # MSS<-sum((predval - mean(predval))^2)
+    # R2<-MSS/(MSS+RSS)
+    # 
+    # rdf<-n-k
+    # AdjR2<- 1 - (1-R2) * ((n - 1)/rdf)
+    # 
+    # resvar <- RSS/rdf
+    # Fstat<-(MSS/(k - 1))/resvar
+    # pvalF<-1-pf(Fstat,k-1,rdf)
+    # 
+    # var<-RSS/n
+    # NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+    # # Faster ?
+    # #((-n/2)*log(2*pi)) - ((n/2)*log(sigma2)) - (RSS/(2*var))
+    # 
+    # BIC <- -2*(-NLL)+(k+1)*log(n) # add variance as parameter
+    # AIC <- 2*(k+1) + n*log(RSS/n)
+    # 
+    # # Flat model
+    # lm_flat<-lm(GeneExp~1)
+    # RSS_flat<-sum(resid(lm_flat)^2)
+    # var_flat<-RSS_flat/n
+    # NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
+    # BIC_flat <- -2*(-NLL_flat)+(1+1)*log(n)
+    # BF_DDHOvFlat<-exp((BIC_flat-BIC)/2)
+    # 
+    # 
+    # return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,
+    #                           BIC=BIC,BIC_flat=BIC_flat,BayesFactor=BF_DDHOvFlat,
+    #                           AIC=AIC,R2=R2,AdjR2=AdjR2,Fstat=Fstat,pvalF=pvalF,numdf=k-1,rdf=rdf,n=n,k=k,ErrorVariance=var)))
   
   }
 
