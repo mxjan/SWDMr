@@ -759,8 +759,17 @@ setMethod("AllForceApplied",signature="SWDMr_DDHO",function(object,params){
   colnames(mF)[ncol(mF)]<-"FstringConst"
   
   # Inner force by damping constant
-  mF<-cbind(mF,out$y2[-1]*exp(allparams[allparams$subparameter == "loggamma","value"]))
-  colnames(mF)[ncol(mF)]<-"Fdamp"
+  if ("loggamma" %in% allparams$subparameter){
+    mF<-cbind(mF,out$y2[-1]*exp(allparams[allparams$subparameter == "loggamma","value"]))
+    colnames(mF)[ncol(mF)]<-"Fdamp"
+  }else if ("dampratio" %in% allparams$subparameter){
+    omegav<-allparams[allparams$subparameter == "omega","value"]
+    damprv<-allparams[allparams$subparameter == "dampratio","value"]
+    gamma<-damprv*2*omegav
+    mF<-cbind(mF,out$y2[-1]*gamma)
+    colnames(mF)[ncol(mF)]<-"Fdamp"
+  }
+
   
   return(as.data.frame(mF))
   

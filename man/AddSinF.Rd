@@ -5,8 +5,7 @@
 \alias{AddSinF}
 \title{Add Sin Force to the model}
 \usage{
-AddSinF(object, FixAmp = numeric(0), FixPhi = numeric(0),
-  FixPer = numeric(0))
+AddSinF(object, FixAmp = numeric(0), FixPhi = numeric(0), FixPer = numeric(0))
 }
 \arguments{
 \item{object}{An SWDMr_DDHO object}
