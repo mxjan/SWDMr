@@ -5,6 +5,24 @@
 
 using namespace Rcpp;
 
+// CptSprocess
+NumericVector CptSprocess(NumericVector Sleep, NumericVector Wake, NumericVector time, double U, double L, double t_w, double t_s, double init);
+RcppExport SEXP _SWDMr_CptSprocess(SEXP SleepSEXP, SEXP WakeSEXP, SEXP timeSEXP, SEXP USEXP, SEXP LSEXP, SEXP t_wSEXP, SEXP t_sSEXP, SEXP initSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type Sleep(SleepSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type Wake(WakeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< double >::type U(USEXP);
+    Rcpp::traits::input_parameter< double >::type L(LSEXP);
+    Rcpp::traits::input_parameter< double >::type t_w(t_wSEXP);
+    Rcpp::traits::input_parameter< double >::type t_s(t_sSEXP);
+    Rcpp::traits::input_parameter< double >::type init(initSEXP);
+    rcpp_result_gen = Rcpp::wrap(CptSprocess(Sleep, Wake, time, U, L, t_w, t_s, init));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SDDHO_SinF_RungeKutta
 List SDDHO_SinF_RungeKutta(NumericVector y, NumericVector time, NumericVector force, double gamma, double k, double AmpSin, double PhiSin, double PerSin);
 RcppExport SEXP _SWDMr_SDDHO_SinF_RungeKutta(SEXP ySEXP, SEXP timeSEXP, SEXP forceSEXP, SEXP gammaSEXP, SEXP kSEXP, SEXP AmpSinSEXP, SEXP PhiSinSEXP, SEXP PerSinSEXP) {
@@ -25,6 +43,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SWDMr_CptSprocess", (DL_FUNC) &_SWDMr_CptSprocess, 8},
     {"_SWDMr_SDDHO_SinF_RungeKutta", (DL_FUNC) &_SWDMr_SDDHO_SinF_RungeKutta, 8},
     {NULL, NULL, 0}
 };

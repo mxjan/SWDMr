@@ -72,10 +72,7 @@ setClass(
 
 ############# Summaries ################
 
-setGeneric("GetFreeFixedParams", function(object)
-  standardGeneric("GetFreeFixedParams") )
-
-setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object) {
+setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   
   freeparams<-matrix(ncol=3,nrow=0)
   fixedparams<-matrix(ncol=3,nrow=0)
@@ -158,9 +155,7 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object) {
 })
 
 
-setGeneric("ShowFreeParams", function(object)
-  standardGeneric("ShowFreeParams") )
-setMethod("ShowFreeParams","SWDMr_DDHO",function(object) {
+setMethod("ShowFreeParams","SWDMr_DDHO",function(object,...) {
   
   cat("~~~~~~~~~~~ Current parameter setting ~~~~~~~~~~ \n\n")
   
@@ -324,8 +319,7 @@ setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = 
   return(object)
 })
 
-setGeneric("SumForces",  function(object,params,allparams=NULL)
-  standardGeneric("SumForces") )
+
 setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=NULL){
   
   if (is.null(allparams)){
@@ -422,8 +416,7 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   
 })
 
-setGeneric("AddUnstableFitPenalization",  function(object,fitted,FittingValue,val,var,weight=1)
-  standardGeneric("AddUnstableFitPenalization") )
+
 setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fitted,FittingValue,val,var,weight=1){
   
   # Weight
@@ -609,8 +602,7 @@ setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object){
 })
 
 
-setGeneric("StatsPerTimePoint", function(object) 
-  standardGeneric("StatsPerTimePoint") )
+
 setMethod("StatsPerTimePoint",signature="SWDMr_DDHO", function(object){
   meansd<-matrix(ncol=3,nrow=length(unique(object@Gexp$Time)))
   colnames(meansd)<-c("mean","sd","se")
@@ -625,8 +617,6 @@ setMethod("StatsPerTimePoint",signature="SWDMr_DDHO", function(object){
 })
 
 
-setGeneric("GetAllParams", function(object,params)
-  standardGeneric("GetAllParams") )
 setMethod("GetAllParams",signature="SWDMr_DDHO",function(object,params){
   
   paramofmodel<-GetFreeFixedParams(object)
@@ -674,8 +664,7 @@ setMethod("ForceApplied",signature="SWDMr_DDHO",function(object,params){
   
 })
 
-setGeneric("PctAbsForceApplied", function(object,params,pct=T) 
-  standardGeneric("PctAbsForceApplied") )
+
 setMethod("PctAbsForceApplied",signature="SWDMr_DDHO",function(object,params,pct=T){
   
   allparams<-GetAllParams(object,params)
@@ -720,9 +709,6 @@ setMethod("PctAbsForceApplied",signature="SWDMr_DDHO",function(object,params,pct
   
 })
 
-
-setGeneric("AllForceApplied", function(object,params) 
-  standardGeneric("AllForceApplied") )
 setMethod("AllForceApplied",signature="SWDMr_DDHO",function(object,params){
   
   allparams<-SWDMr:::GetAllParams(object,params)

@@ -19,6 +19,7 @@ initDDHOmodel<-function(object,VarExp, UseDampingRatio = F){
       UseDampingRatio = UseDampingRatio)
 }
 
+
 #' Create a SWDMr object
 #'
 #' Create a SWDMr object using a sleep-wake data.frame and a gene expression data.frame
@@ -198,3 +199,97 @@ setGeneric("SWDMrStats", function(object,fitted,FittingValue="RSS",detailed=F)
 #' optimx(objfunc,params)
 setGeneric("SWDMrGetEvalFun", function(object)
   standardGeneric("SWDMrGetEvalFun") )
+
+
+
+##########################################################################
+######################## PROCESS S #######################################
+
+#' Initiate Process S model
+#'
+#' Initiate a Process S model of sleep
+#'
+#' @param object A SWDMr object 
+#' @param VarExp The name of the variable to explain by the model
+#' 
+#' @return SWDMr model object
+#'
+#' @examples
+#' model <- initProcessSmodel(swdmr,VarExp = "Arntl")
+#'
+#'@export
+initProcessSmodel<-function(object,VarExp){
+  new(Class = "SWDMr_ProcS", SWdist = object@SWdist, 
+      Gexp = object@Gexp[c(VarExp,"Time")],
+      VarExp = VarExp)
+}
+
+
+#' Fix Asymptote of wake in the model
+#'
+#' @param object An SWDMr_ProcS object
+#' @param value top value reached by wake
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixAsymptWake(model,300)
+setGeneric("FixAsymptWake", function(object,value)
+  standardGeneric("FixAsymptWake") )
+
+
+#' Fix Asymptote of sleep in the model
+#'
+#' @param object An SWDMr_ProcS object
+#' @param value top value reached by wake
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixAsymptSleep(model,80)
+setGeneric("FixAsymptSleep", function(object,value)
+  standardGeneric("FixAsymptSleep") )
+
+#' Fix time constant of wake in the model
+#'
+#' @param object An SWDMr_ProcS object
+#' @param value top value reached by wake
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixTimeConstWake(model,16)
+setGeneric("FixTimeConstWake", function(object,value)
+  standardGeneric("FixTimeConstWake") )
+
+
+#' Fix Time constant of sleep in the model
+#'
+#' @param object An SWDMr_ProcS object
+#' @param value top value reached by wake
+#' @export
+#' @docType methods
+#' @examples
+#' model<-FixTimeConstSleep(model,8)
+setGeneric("FixTimeConstSleep", function(object,value)
+  standardGeneric("FixTimeConstSleep") )
+
+
+
+
+
+######################### GENERIC
+setGeneric(name="ShowFreeParams", def = function(object,...)
+  standardGeneric("ShowFreeParams"))
+setGeneric("GetFreeFixedParams", function(object,...)
+  standardGeneric("GetFreeFixedParams") )
+setGeneric("GetAllParams", function(object,params)
+  standardGeneric("GetAllParams") )
+setGeneric("SumForces",  function(object,params,allparams=NULL)
+  standardGeneric("SumForces") )
+setGeneric("AddUnstableFitPenalization",  function(object,fitted,FittingValue,val,var,weight=1)
+  standardGeneric("AddUnstableFitPenalization") )
+setGeneric("StatsPerTimePoint", function(object) 
+  standardGeneric("StatsPerTimePoint") )
+setGeneric("PctAbsForceApplied", function(object,params,pct=T) 
+  standardGeneric("PctAbsForceApplied") )
+setGeneric("AllForceApplied", function(object,params) 
+  standardGeneric("AllForceApplied") )
+

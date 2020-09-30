@@ -39,22 +39,7 @@ Explained variable is gene expression
 # ***** Prepare Gene expression data ******
 # Gene expression
 #load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/CHN2019_TimeCourse_NormalizedData_Genes.RData")
-load("../Data/C57BL6J_Liver_TimeCourse_CHN2019/CHN2019Liver_TimeCourse_NormalizedData_Genes.RData")
-# Meta data
-#load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/CHN2019_TimeCourse_MetaData.RData")
-load("../Data/C57BL6J_Liver_TimeCourse_CHN2019/CHN2019Liver_TimeCourse_MetaData.RData")
-# Remove data sampled 7days after SD
-rna_expr<-rna_expr[,rna_meta$Time<100]
-rna_meta<-rna_meta[rna_meta$Time<100,]
-# Row = samples, column = gene
-rna_expr<-t(rna_expr)
-#rna_expr<-2^rna_expr
-rna_expr<-as.data.frame(rna_expr)
-# Add time factor
-rna_expr$Time<-rna_meta$Time+24
-head(rna_expr[,c("Arntl","Dbp","Time")])
-
-#rna_expr<-rna_expr[-which(rna_expr$Time %in% c(51,54)),]
+load("../Data/C57BL6J_Liver_TimeCourse_MJCHN2020/B6Liver_FilePrepSWDMr.Rdata")
 ```
 
 # Run fitting
@@ -172,7 +157,7 @@ axis(1,seq(0,120,by=12),seq(0,120,by=12))
 Get some statistics for the fit (R2, and AdjR2 are not valid measure ! Do not use them !)
 
 ```{r}
-SWDMrStats(model,out,detailed = T)
+SWDMrStats(model,out,detailed = T)$stats
 ```
 
 Plot fit and gene expression using ggplot2
@@ -180,6 +165,37 @@ Plot fit and gene expression using ggplot2
 ```{r}
 SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
+## Process S Fit
+
+```{r}
+modelS<-initProcessSmodel(swdmr,VarExp = Gene)
+modelS<-ReplicateDrivingForce(modelS,c(0,24.0),40)
+modelS<-SetYinitMode(modelS,"Fixed",4.8)
+```
+
+
+```{r}
+modelS
+```
+
+```{r}
+objfun<-SWDMrGetEvalFun(modelS)
+paramsS<-c("AsympWake"=6,AsympSleep=4,TauWake=10,TauSleep=10)
+fitsS<-optimx(paramsS,fn = objfun,method=c("nlminb"),control=list(maxit=1000))
+
+outS<-SWDMrFit(modelS,fits)
+```
+
+
+```{r}
+SWDMr:::StandardFittingPlot(modelS,fitsS[1,])
+```
+
+```{r}
+SWDMrStats(modelS,outS,detailed = T)$stats
+```
+
+
 
 Mean force applied by each force on the oscillator
 

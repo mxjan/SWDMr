@@ -2,6 +2,11 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @export
+CptSprocess <- function(Sleep, Wake, time, U, L, t_w, t_s, init) {
+    .Call('_SWDMr_CptSprocess', PACKAGE = 'SWDMr', Sleep, Wake, time, U, L, t_w, t_s, init)
+}
+
+#' @export
 SDDHO_SinF_RungeKutta <- function(y, time, force, gamma, k, AmpSin, PhiSin, PerSin) {
     .Call('_SWDMr_SDDHO_SinF_RungeKutta', PACKAGE = 'SWDMr', y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
 }
