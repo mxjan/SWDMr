@@ -5,6 +5,8 @@ date: 12 August 2019
 output:
   md_document:
     variant: markdown_github
+    toc: true
+    toc_depth: 2
 ---
 
 # Package
@@ -201,14 +203,14 @@ SWDMrStats(modelS,outS,detailed = T)$stats
 
 Mean force applied by each force on the oscillator
 
-```{r}
+```{r,eval=F}
 Fmod<-SWDMr:::AllForceApplied(model,optimxres)
 sumF<-apply(abs(Fmod[,seq(2,6)]),1,sum)
 Fmod[,seq(2,6)]<-abs(Fmod[,seq(2,6)])/sumF
 apply(Fmod[Fmod$Time>48 & Fmod$Time < 72.1,],2,mean)
 ```
 
-```{r}
+```{r,eval=F}
 optimx2<-optimxres[1,]
 optimx2["AmpSin"]<-0
 SWDMr:::StandardFittingPlot(model,optimx2)
@@ -230,7 +232,7 @@ SWDMr:::StandardFittingPlot(model,optimx2)
 
 Compute confidence interval using empirical bootstrap
 
-```{r}
+```{r,eval=F}
 # See http://sia.webpopix.org/nonlinearRegression.html
 EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 7){
   
@@ -301,7 +303,7 @@ EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 
 
 Confidence intervals
 
-```{r,eval=F}
+```{r,eval=F,eval=F}
 EmpBootres<-EmpBoot(model,optimxres,params,upper,lower,nboot=200)
 EmpBootres$CI
 #EmpBootres$Est.pvals
