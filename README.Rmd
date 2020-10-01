@@ -14,9 +14,9 @@ output:
 *An R package to fit models for sleep-wake driven phenotypes* 
 
 - [x] Read and format vigilant state data
-- [] Read *smo* file format
+- [ ] Read *smo* file format
 - [x] Fit a Process-S dynamic model
-- [] Fit a Process-C dynamic model
+- [ ] Fit a Process-C dynamic model
 - [x] Fit an driven damped harmonic oscillator model
 
 
@@ -26,7 +26,6 @@ library(SWDMr) # Package for model construction, objective function building
 # External package
 library(optimx) # Package for parameter optimization
 library(ggplot2) # Package for visualization
-library(doSNOW) # Package for multiprocessing
 ```
 
 
@@ -210,7 +209,9 @@ qqnorm(residuals);qqline(residuals)
 ```
 
 
-# Run fitting
+# Driven Damped harmonic oscillator
+
+$$m\frac{d^2x}{dt^2} + m\gamma\frac{dx}{dt} + m\omega^2_{0}x = F(t)$$
 
 Build swdmr object
 

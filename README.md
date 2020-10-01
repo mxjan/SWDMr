@@ -8,7 +8,8 @@
     -   [Optimization](#optimization)
     -   [Visualize fit](#visualize-fit)
     -   [Compute some statistics](#compute-some-statistics)
--   [Run fitting](#run-fitting)
+-   [Driven Damped harmonic
+    oscillator](#driven-damped-harmonic-oscillator)
 
 Sleep-Wake Driven Models, an R package \[SWDMr\]
 ================================================
@@ -16,9 +17,9 @@ Sleep-Wake Driven Models, an R package \[SWDMr\]
 *An R package to fit models for sleep-wake driven phenotypes*
 
 -   [x] Read and format vigilant state data
--   \[\] Read *smo* file format
+-   [ ] Read *smo* file format
 -   [x] Fit a Process-S dynamic model
--   \[\] Fit a Process-C dynamic model
+-   [ ] Fit a Process-C dynamic model
 -   [x] Fit an driven damped harmonic oscillator model
 
 ``` r
@@ -30,16 +31,6 @@ library(ggplot2) # Package for visualization
 ```
 
     ## Warning: package 'ggplot2' was built under R version 4.0.2
-
-``` r
-library(doSNOW) # Package for multiprocessing
-```
-
-    ## Loading required package: foreach
-
-    ## Loading required package: iterators
-
-    ## Loading required package: snow
 
 Format vigilant state
 =====================
@@ -243,7 +234,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.48
+    ## Nelder-Mead        1 FALSE FALSE  0.49
 
 Visualize fit
 -------------
@@ -315,8 +306,10 @@ qqnorm(residuals);qqline(residuals)
 
 ![](README_files/figure-markdown_github/unnamed-chunk-20-2.png)
 
-Run fitting
-===========
+Driven Damped harmonic oscillator
+=================================
+
+$$m\\frac{d^2x}{dt^2} + m\\gamma\\frac{dx}{dt} + m\\omega^2\_{0}x = F(t)$$
 
 Build swdmr object
 
@@ -406,7 +399,7 @@ fits
     ##             Wake      Sleep  loggamma     omega      AmpSin   PhiSin     value
     ## nlminb 0.1580769 -0.1786065 -2.192577 0.2157555 0.006161535 3.710265 0.3754079
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     36    178    25        0 TRUE TRUE  0.47
+    ## nlminb     36    178    25        0 TRUE TRUE   0.5
 
 ``` r
 if (! any(! is.na(fits$Wake))){
@@ -427,7 +420,7 @@ optimxres
     ##             Wake      Sleep  loggamma     omega      AmpSin   PhiSin     value
     ## nlminb 0.1580769 -0.1786065 -2.192577 0.2157555 0.006161535 3.710265 0.3754079
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     36    178    25        0 TRUE TRUE  0.47
+    ## nlminb     36    178    25        0 TRUE TRUE   0.5
 
 Get fit
 
@@ -481,20 +474,18 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] doSNOW_1.0.18    snow_0.4-3       iterators_1.0.12 foreach_1.5.0   
-    ## [5] ggplot2_3.3.2    optimx_2020-4.2  SWDMr_1.1       
+    ## [1] ggplot2_3.3.2   optimx_2020-4.2 SWDMr_1.1      
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] Rcpp_1.0.4.6        pillar_1.4.3        compiler_4.0.0     
-    ##  [4] tools_4.0.0         digest_0.6.25       evaluate_0.14      
-    ##  [7] lifecycle_0.2.0     tibble_3.0.1        gtable_0.3.0       
-    ## [10] pkgconfig_2.0.3     rlang_0.4.5         parallel_4.0.0     
-    ## [13] yaml_2.2.1          xfun_0.13           withr_2.2.0        
-    ## [16] stringr_1.4.0       dplyr_0.8.5         knitr_1.28         
-    ## [19] vctrs_0.2.4         grid_4.0.0          tidyselect_1.0.0   
-    ## [22] glue_1.4.0          R6_2.4.1            rmarkdown_2.1      
-    ## [25] farver_2.0.3        purrr_0.3.4         magrittr_1.5       
-    ## [28] scales_1.1.0        codetools_0.2-16    ellipsis_0.3.0     
-    ## [31] htmltools_0.5.0     assertthat_0.2.1    colorspace_1.4-1   
-    ## [34] numDeriv_2016.8-1.1 labeling_0.3        stringi_1.4.6      
-    ## [37] munsell_0.5.0       crayon_1.3.4
+    ##  [1] Rcpp_1.0.4.6        knitr_1.28          magrittr_1.5       
+    ##  [4] tidyselect_1.0.0    munsell_0.5.0       colorspace_1.4-1   
+    ##  [7] R6_2.4.1            rlang_0.4.5         dplyr_0.8.5        
+    ## [10] stringr_1.4.0       tools_4.0.0         grid_4.0.0         
+    ## [13] gtable_0.3.0        xfun_0.13           withr_2.2.0        
+    ## [16] htmltools_0.5.0     ellipsis_0.3.0      assertthat_0.2.1   
+    ## [19] yaml_2.2.1          digest_0.6.25       tibble_3.0.1       
+    ## [22] lifecycle_0.2.0     crayon_1.3.4        numDeriv_2016.8-1.1
+    ## [25] farver_2.0.3        purrr_0.3.4         vctrs_0.2.4        
+    ## [28] glue_1.4.0          evaluate_0.14       rmarkdown_2.1      
+    ## [31] labeling_0.3        stringi_1.4.6       compiler_4.0.0     
+    ## [34] pillar_1.4.3        scales_1.1.0        pkgconfig_2.0.3
