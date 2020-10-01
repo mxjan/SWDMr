@@ -11,13 +11,13 @@
 #' @return dataframe
 #'
 #' @examples
-#' files <- list.files(path="Data/",pattern = paste("^","BL6",sep=""),full.names = T)
-#' SWdf<-Read_SW(files)
+#' data(SleepWakeData)
+#' SWdf<-Read_SW(SleepWakeData)
 #'
 #'@export
-Read_SW<-function(files,concat="mean",nepochs=86400,epochlengthsec=4,concattimesec=300){
+Read_SW<-function(Mres,concat="mean",nepochs=86400,epochlengthsec=4,concattimesec=300){
   
-  df<-Read_Mouse_States(files,concat=concat,nepochs=nepochs,epochlengthsec=epochlengthsec,concattimesec=concattimesec)
+  df<-Read_Mouse_States(Mres,concat=concat,nepochs=nepochs,epochlengthsec=epochlengthsec,concattimesec=concattimesec)
   df<-AddDaySWdistr(df,concattimesec=concattimesec)
   df<-AddTimeHSWdistr(df,concattimesec=concattimesec)
   return(df)
@@ -110,15 +110,15 @@ SWdf_AddSD<-function(SWdf,Interval){
 }
 
 # Read sleep data
-Read_Mouse_States<-function(files,concat="mean",nepochs=86400,epochlengthsec=4,concattimesec=300){
+Read_Mouse_States<-function(Mres,concat="mean",nepochs=86400,epochlengthsec=4,concattimesec=300){
   
-  Mres<-matrix(ncol=length(files),nrow=nepochs)
-  colnames(Mres)<-files
-  
-  for (f in files){
-    x<-read.table(f,stringsAsFactors = F)
-    Mres[,f]<-x$V1
-  }
+  # Mres<-matrix(ncol=length(files),nrow=nepochs)
+  # colnames(Mres)<-files
+  # 
+  # for (f in files){
+  #   x<-read.table(f,stringsAsFactors = F)
+  #   Mres[,f]<-x$V1
+  # }
   
   l_window<-concattimesec/epochlengthsec
   n_window<-nepochs/l_window
@@ -150,7 +150,7 @@ Read_Mouse_States<-function(files,concat="mean",nepochs=86400,epochlengthsec=4,c
     }
   }
   
-  if (length(files)>1){
+  if (nrow(Mres)>1){
     CatValW<-apply(McountW,1,concat)*epochlengthsec/3600
     CatValN<-apply(McountN,1,concat)*epochlengthsec/3600
     CatValR<-apply(McountR,1,concat)*epochlengthsec/3600

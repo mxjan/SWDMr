@@ -14,44 +14,201 @@ output:
 *An R package to fit models for sleep-wake driven phenotypes* 
 
 - [x] Read and format vigilant state data
+- [] Read *smo* file format
 - [x] Fit a Process-S dynamic model
+- [] Fit a Process-C dynamic model
 - [x] Fit an driven damped harmonic oscillator model
 
 
-# Package
-
-load packages
-
 ```{r}
-library(SWDMr)
-library(optimx)
-library(ggplot2)
-library(doSNOW)
+library(SWDMr) # Package for model construction, objective function building
+
+# External package
+library(optimx) # Package for parameter optimization
+library(ggplot2) # Package for visualization
+library(doSNOW) # Package for multiprocessing
 ```
 
-# Prepare data
 
-Sleep-wake data per hour
+# Format vigilant state
+
+Get vigilant state of mice. Each row is a 4 seconds epoch containing the vigilant state of the mouse
+
+Wake = w | 1
+NREM sleep = n | 2
+REM sleep = r | 3
 
 ```{r}
-# Data
-# ****** Prepare Sleep-Wake data ****** 
-files <- list.files(path="../Data/BXD_SleepWake_SDMJ2018/",pattern = paste("^","BL6",sep=""),full.names = T)
-SWdf<-Read_SW(files,concattimesec = 360) # 300 = 5min, 180 = 3 min, 360 = 6min
-SWdf<-SWdf_AddLD(SWdf) # Add Light and Dark
+data(SleepWakeData)
+head(as.data.frame(SleepWakeData))
+```
+
+Compute the amount of wake,nrem and rem sleep per 6 minutes bin (0.1h)
+
+```{r}
+# Read the matrix and transform it into a data.frame for time spent in each state per "concattimesec" bin [in sec]
+SWdf<-Read_SW(SleepWakeData,concattimesec = 360) # 300 = 5min, 180 = 3 min, 360 = 6min
+
+# We can add day and night cycle
+SWdf<-SWdf_AddLD(SWdf)
+
+# We merge day 1 and 2 that are "baseline", then following days are 3 and 4, then baseline sleep is reiterated
 SWdf<-SWdf_DayMerging(SWdf,Daysformat=list(c(1,2),c(1,2),3,4,c(1,2)),concattimesec=360)
+
+# We add sleep deprivation even at time 48
 SWdf<-SWdf_AddSD(SWdf,c(48,54))
+
+# End result:
 head(SWdf)
 ```
 
-Explained variable is gene expression
+Sleep amount in the experiment
+
+```{r,fig.width=6,fig.height=3}
+gg<-ggplot(aes(x=Time,y=Sleep),data=SWdf)+geom_line(color="darkblue",size=1)
+gg<-gg+scale_x_continuous(breaks=seq(0,96,by=12))
+gg<-gg+ylab("Sleep amount [h]")+xlab("Time [h]")
+gg
+```
+
+# Fit a process-S dynamic on phenotype
+
+First we load data for time spent awake or asleep
+
+## Data:
 
 ```{r}
-# ***** Prepare Gene expression data ******
-# Gene expression
-#load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/CHN2019_TimeCourse_NormalizedData_Genes.RData")
-load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/B6Cortex_FilePrepSWDMr.Rdata")
+# Contain a data.frame of time spent asleep or awake
+data(SWdf)
+head(SWdf)
 ```
+
+We then load phenotypes containing also time of sampling corresponding with the sleep-wake data.frame
+
+```{r}
+data(RNAExpression)
+head(RNAExpression)
+```
+
+Let's model the dynamics of Homer1
+
+## Create model
+
+We create a swdmr object containing sleep-wake data and phenotypes
+
+```{r}
+swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
+swdmr
+```
+
+We then initiate a model for a process-S dynamics
+
+```{r}
+modelS<-initProcessSmodel(swdmr,VarExp = "Homer1")
+```
+
+We replicate the baseline time (time0-time24) 10x to have a stable baseline dynamics
+
+```{r}
+modelS<-ReplicateDrivingForce(modelS,c(0,24.0),10)
+```
+
+
+We fix the starting point as mean expression level
+
+```{r}
+modelS<-SetYinitMode(modelS,"Fixed",mean(RNAExpression$Homer1))
+```
+
+
+We want to optimize our objective function to minimize the Residual Sum of Square (RSS)
+
+```{r}
+modelS<-SetFittingValue(modelS,value = "RSS")
+```
+
+Our model as the following free parameters:
+
+```{r}
+modelS
+```
+
+*We could fix some of these parameters*
+
+```{r}
+# Here, asymptotic value for time spent awake is 10 for the phenotype of interest
+anothermodel<-FixAsymptWake(modelS,10)
+anothermodel
+```
+
+## Optimization
+
+We create an objective function:
+
+```{r}
+objfun<-SWDMrGetEvalFun(modelS)
+```
+
+We use optimx to optimize the free parameter to minimize the RSS
+
+```{r}
+paramsS<-c("AsympWake"=6,AsympSleep=4,TauWake=10,TauSleep=10)
+# Many other algorithms and options exist ! See optimx manual to fit your needs
+fitsS<-optimx(paramsS,fn = objfun,method=c("Nelder-Mead"))
+fitsS
+```
+## Visualize fit
+
+Let see the fit
+
+```{r}
+outS<-SWDMrFit(modelS,fitsS)
+```
+
+
+```{r,fig.width=6,fig.height=3}
+# plot fitted lines
+gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=outS$time,fit=outS$y1))
+gg<-gg+geom_line()
+# Add expression points
+gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Homer1)
+gg<-gg + xlim(-24,96)
+gg
+```
+
+## Compute some statistics
+
+
+```{r}
+residuals<-SWDMrStats(modelS,outS,detailed = T)$residuals
+fitted<-SWDMrStats(modelS,outS,detailed = T)$fitted
+stats<-SWDMrStats(modelS,outS,detailed = T)$stats
+```
+
+
+- Residual Sum of Square: RSS
+- Negative Log Likelihood: NLL
+- Bayesian Information Criterion: BIC
+- BIC of a linear model with an intercept only: BIC_flat
+- Bayes Factor between our model and a flat model: BayesFactor
+- Akaike Information Criterion: AIC
+- Number of samples in model: n
+- Number of free parameters: k
+- Variance of resiudals: ErrorVariance
+- Kendall's tau between data points and fit: KendalTau
+
+
+```{r}
+stats
+```
+*Here n=56 while dataset contains 62 points. Because fit was performed up to Time96 while last points reach Time 216 and 222. If these points needed to be integrated, then SWdf should go up to time 222*
+
+
+```{r}
+plot(fitted,residuals);abline(h=mean(residuals))
+qqnorm(residuals);qqline(residuals)
+```
+
 
 # Run fitting
 
@@ -65,14 +222,14 @@ Build swdmr object
 
 
 ```{r}
-swdmr <- SWDMr(SWdist=SWdf, Gexp=rna_expr)
+swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
 swdmr
 ```
 
 Initiate a Driven Damped Harmonic Oscillator [DDHO] model for a gene
 
 ```{r}
-Gene<-"Nr1d1"
+Gene<-"Arntl"
 model<-initDDHOmodel(swdmr,VarExp = Gene)
 ```
 
@@ -80,7 +237,7 @@ Set some parameter of our model
 
 ```{r}
 # Mean expression in baseline between highest and lowest value
-MeanPerTime<-aggregate(rna_expr[rna_meta$SD_NSD == "NSD",Gene],list(rna_meta$Time[rna_meta$SD_NSD == "NSD"]),mean)
+MeanPerTime<-aggregate(RNAExpression[RNAExpression$Time <= 48,Gene],list(RNAExpression$Time[RNAExpression$Time <= 48]),mean)
 MeanGeneExprInBaseline<-(max(MeanPerTime$x)+min(MeanPerTime$x))/2
 
 # Fix the intercepts
@@ -118,23 +275,6 @@ objfun<-SWDMrGetEvalFun(model)
 # 1st Fit
 params<-c(Wake=-0.1,Sleep=0.1,loggamma=log(1e-1),omega=2*pi/24,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000))
-params<-c(Wake=0.1,Sleep=-0.1,loggamma=log(1e-1),omega=2*pi/24,AmpSin=0,PhiSin=pi)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
-params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/24,AmpSin=0.01,PhiSin=pi)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
-params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/24,AmpSin=0.01,PhiSin=0)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
-
-
-# Overdamped fit
-params<-c(Wake=-1,Sleep=1,loggamma=1,omega=2*pi/24,AmpSin=0,PhiSin=pi)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
-params<-c(Wake=1,Sleep=-1,loggamma=1,omega=2*pi/24,AmpSin=0,PhiSin=pi)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
-params<-c(Wake=0,Sleep=0,loggamma=1,omega=2*pi/24,AmpSin=0.01,PhiSin=pi)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
-params<-c(Wake=0,Sleep=0,loggamma=1,omega=2*pi/24,AmpSin=0.01,PhiSin=0)
-fits<-rbind(fits, optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000)))
 
 fits
 
@@ -176,157 +316,6 @@ Plot fit and gene expression using ggplot2
 ```{r}
 SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
-
-## Process S Fit
-
-```{r}
-modelS<-initProcessSmodel(swdmr,VarExp = Gene)
-modelS<-ReplicateDrivingForce(modelS,c(0,24.0),40)
-modelS<-SetYinitMode(modelS,"Fixed",9)
-modelS<-SetFittingValue(modelS,value = "NLL")
-```
-
-
-```{r}
-modelS
-```
-
-```{r}
-objfun<-SWDMrGetEvalFun(modelS)
-paramsS<-c("AsympWake"=6,AsympSleep=4,TauWake=10,TauSleep=10)
-fitsS<-optimx(paramsS,fn = objfun,method=c("nlminb"),control=list(maxit=1000))
-
-outS<-SWDMrFit(modelS,fitsS)
-```
-
-
-```{r}
-SWDMr:::StandardFittingPlot(modelS,fitsS[1,])
-```
-
-```{r}
-SWDMrStats(modelS,outS,detailed = T)$stats
-```
-
-
-
-Mean force applied by each force on the oscillator
-
-```{r,eval=F}
-Fmod<-SWDMr:::AllForceApplied(model,optimxres)
-sumF<-apply(abs(Fmod[,seq(2,6)]),1,sum)
-Fmod[,seq(2,6)]<-abs(Fmod[,seq(2,6)])/sumF
-apply(Fmod[Fmod$Time>48 & Fmod$Time < 72.1,],2,mean)
-```
-
-```{r,eval=F}
-optimx2<-optimxres[1,]
-optimx2["AmpSin"]<-0
-SWDMr:::StandardFittingPlot(model,optimx2)
-
-optimx2<-optimxres[1,]
-optimx2["omega"]<-2*pi/24
-SWDMr:::StandardFittingPlot(model,optimx2)
-
-optimx2<-optimxres[1,]
-optimx2["Sleep"]<-0
-optimx2["Wake"]<-0
-SWDMr:::StandardFittingPlot(model,optimx2)
-```
-
-
-
-
-# Empirical bootstrap
-
-Compute confidence interval using empirical bootstrap
-
-```{r,eval=F}
-# See http://sia.webpopix.org/nonlinearRegression.html
-EmpBoot<-function(model, optimxres, params, upper, lower, nboot = 100, NCORES = 7){
-  
-  out<-SWDMrFit(model,params = optimxres[1,])
-  
-  F <- matrix(nrow=nboot,ncol=length(out$y1))
-  Y <- matrix(nrow=nboot,ncol=length(out$y1))
-  
-  pred<-SWDMrFit(model,params = optimxres[1,])
-  predv<-pred$y1
-  names(predv)<-pred$time
-  predval<-predv[as.character(model@Gexp[,"Time"])]
-  
-  stats<-SWDMrStats(model,out,detailed = T)
-  model2<-model
-  
-  paramsboot<-as.numeric(optimxres[1,names(params)])
-  names(paramsboot)<-names(params)
-  
-  cl <- makeCluster(NCORES)
-  #clusterExport(cl,c("lower","upper","model2","stats"))
-  registerDoSNOW(cl)
-  
-  B <- foreach(i = 1:nboot,.packages=c("SWDMr","optimx"),.combine="rbind") %dopar% {
-    n<-length(model2@Gexp[,1])
-    model2@Gexp[,1]<- predval + sqrt(stats[["ErrorVariance"]])*rnorm(n)
-    objfunboot<-SWDMrGetEvalFun(model2)
-    #optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"),lower = lower,upper=upper)
-    optimxresboot<-optimx(paramsboot,objfunboot,method=c("nlminb"))
-    
-    return(as.numeric(optimxresboot[1,names(params)]))
-  }
-  stopCluster(cl)
-  
-  for (l in 1:nrow(B)){
-    bootpar<-B[l,]
-    names(bootpar)<-names(params)
-    outboot<-SWDMrFit(model,params = bootpar)
-    F[l,] <- outboot$y1
-    Y[l,] <- outboot$y1 + rnorm(1,0,sqrt(stats[["ErrorVariance"]]))
-  }
-  
-  level <- 0.95
-  alpha <- 1 - level
-  df.mc<-data.frame(Time=out$time)
-  df.mc[c("lwr.conf","upr.conf")] <- t(apply(F,MARGIN=2,function(x) quantile(x,c(alpha/2,1-alpha/2),na.rm=T)))
-  df.mc[c("lwr.pred","upr.pred")] <- t(apply(Y,MARGIN=2,function(x) quantile(x,c(alpha/2,1-alpha/2),na.rm=T)))
-  df.mc<-df.mc[df.mc$Time>0,]
-  V.mc <- cov(B)
-  
-  se.mc <- sqrt(diag(V.mc))
-  
-  t.stat <- paramsboot/se.mc
-  p.value <- 2*(1 - pt(abs(t.stat),51))
-  
-  Est.pvals<-cbind(Estimate=paramsboot,SE=se.mc,Tstat=t.stat,p.value)
-  
-  
-  b <- c(apply(B,MARGIN=2,function(x) quantile(x,alpha/2,na.rm=T)),
-         apply(B,MARGIN=2,function(x) quantile(x,1-alpha/2,na.rm=T)))
-  ci.mc=matrix(b,ncol=2)
-  row.names(ci.mc) <- names(paramsboot)
-  colnames(ci.mc) <- c(paste0((1-level)/2*100,"%"),paste0((1+level)/2*100,"%"))
-
-  return(list(B=B,Y=Y,F=F,CI=ci.mc,Est.pvals=Est.pvals,df.mc=df.mc))
-}
-```
-
-Confidence intervals
-
-```{r,eval=F,eval=F}
-EmpBootres<-EmpBoot(model,optimxres,params,upper,lower,nboot=200)
-EmpBootres$CI
-#EmpBootres$Est.pvals
-```
-
-
-
-```{r,eval=F}
-p<-SWDMr:::StandardFittingPlot(model,optimxres[1,])
-p <- p + annotate("ribbon",x=EmpBootres$df.mc$Time, ymin=EmpBootres$df.mc$lwr.pred, ymax=EmpBootres$df.mc$upr.pred, alpha=0.2, fill="blue")
-p <- p + annotate("ribbon",x=EmpBootres$df.mc$Time, ymin=EmpBootres$df.mc$lwr.conf, ymax=EmpBootres$df.mc$upr.conf, alpha=0.4, fill="#339900")
-p
-```
-
 
 ```{r}
 sessionInfo()
