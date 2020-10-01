@@ -39,7 +39,7 @@ Explained variable is gene expression
 # ***** Prepare Gene expression data ******
 # Gene expression
 #load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/CHN2019_TimeCourse_NormalizedData_Genes.RData")
-load("../Data/C57BL6J_Liver_TimeCourse_MJCHN2020/B6Liver_FilePrepSWDMr.Rdata")
+load("../Data/C57BL6J_Cortex_TimeCourse_CHN2019/B6Cortex_FilePrepSWDMr.Rdata")
 ```
 
 # Run fitting
@@ -61,7 +61,7 @@ swdmr
 Initiate a Driven Damped Harmonic Oscillator [DDHO] model for a gene
 
 ```{r}
-Gene<-"Hnmt"
+Gene<-"Nr1d1"
 model<-initDDHOmodel(swdmr,VarExp = Gene)
 ```
 
@@ -165,12 +165,14 @@ Plot fit and gene expression using ggplot2
 ```{r}
 SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
+
 ## Process S Fit
 
 ```{r}
 modelS<-initProcessSmodel(swdmr,VarExp = Gene)
 modelS<-ReplicateDrivingForce(modelS,c(0,24.0),40)
-modelS<-SetYinitMode(modelS,"Fixed",4.8)
+modelS<-SetYinitMode(modelS,"Fixed",9)
+modelS<-SetFittingValue(modelS,value = "NLL")
 ```
 
 
@@ -183,7 +185,7 @@ objfun<-SWDMrGetEvalFun(modelS)
 paramsS<-c("AsympWake"=6,AsympSleep=4,TauWake=10,TauSleep=10)
 fitsS<-optimx(paramsS,fn = objfun,method=c("nlminb"),control=list(maxit=1000))
 
-outS<-SWDMrFit(modelS,fits)
+outS<-SWDMrFit(modelS,fitsS)
 ```
 
 
