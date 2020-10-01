@@ -1,13 +1,31 @@
 ---
 title: "Examples"
 author: Maxime Jan
-date: 12 August 2019
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   md_document:
     variant: markdown_github
     toc: true
     toc_depth: 2
 ---
+
+# Sleep-Wake Driven Model, an R package
+
+*An R package to fit models for sleep-wake driven phenotypes* 
+
+
+# Quarterly Results {.tabset}
+
+wadawd
+
+## awdaw
+
+awdawd
+
+## dwaigga
+
+dawdaw
+
 
 # Package
 

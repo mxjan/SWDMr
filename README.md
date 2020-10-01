@@ -1,8 +1,33 @@
+-   [Sleep-Wake Driven Model, an R
+    package](#sleep-wake-driven-model-an-r-package)
+-   [Quarterly Results](#quarterly-results)
+    -   [awdaw](#awdaw)
+    -   [dwaigga](#dwaigga)
 -   [Package](#package)
 -   [Prepare data](#prepare-data)
 -   [Run fitting](#run-fitting)
     -   [Process S Fit](#process-s-fit)
 -   [Empirical bootstrap](#empirical-bootstrap)
+
+Sleep-Wake Driven Model, an R package
+=====================================
+
+*An R package to fit models for sleep-wake driven phenotypes*
+
+Quarterly Results
+=================
+
+wadawd
+
+awdaw
+-----
+
+awdawd
+
+dwaigga
+-------
+
+dawdaw
 
 Package
 =======
@@ -176,13 +201,13 @@ fits
     ## nlminb7 -1.4703483 2.2341219  0.9528618 0.6968192  0.234560744  0.1522386
     ##                 value fevals gevals niter convcode  kkt1  kkt2 xtime
     ## nlminb   1.677829e+00     62    250    37        0  TRUE FALSE  0.77
-    ## nlminb1  1.677829e+00     49    239    33        0 FALSE FALSE  0.72
-    ## nlminb2  1.677829e+00     54    253    37        0  TRUE FALSE  0.77
+    ## nlminb1  1.677829e+00     49    239    33        0 FALSE FALSE  0.71
+    ## nlminb2  1.677829e+00     54    253    37        0  TRUE FALSE  0.75
     ## nlminb3  1.677829e+00     53    251    35        0  TRUE FALSE  0.75
-    ## nlminb4  3.013493e+00     33    244    28        0  TRUE  TRUE  0.70
-    ## nlminb5 8.988466e+307     NA     NA    NA     9999    NA    NA  1.11
-    ## nlminb6  3.013493e+00     38    289    33        0  TRUE  TRUE  0.80
-    ## nlminb7  3.013493e+00     41    275    34        0  TRUE  TRUE  0.82
+    ## nlminb4  3.013493e+00     33    244    28        0  TRUE  TRUE  0.72
+    ## nlminb5 8.988466e+307     NA     NA    NA     9999    NA    NA  1.13
+    ## nlminb6  3.013493e+00     38    289    33        0  TRUE  TRUE  0.81
+    ## nlminb7  3.013493e+00     41    275    34        0  TRUE  TRUE  0.81
 
 ``` r
 if (! any(! is.na(fits$Wake))){
@@ -203,7 +228,7 @@ optimxres
     ##               Wake    Sleep  loggamma     omega      AmpSin   PhiSin    value
     ## nlminb2 -0.1383652 0.220459 -3.442465 0.2449083 0.008010172 2.644299 1.677829
     ##         fevals gevals niter convcode kkt1  kkt2 xtime
-    ## nlminb2     54    253    37        0 TRUE FALSE  0.77
+    ## nlminb2     54    253    37        0 TRUE FALSE  0.75
 
 Get fit
 
