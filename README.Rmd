@@ -9,22 +9,13 @@ output:
     toc_depth: 2
 ---
 
-# Sleep-Wake Driven Model, an R package
+# Sleep-Wake Driven Models, an R package [SWDMr]
 
 *An R package to fit models for sleep-wake driven phenotypes* 
 
-
-# Quarterly Results {.tabset}
-
-wadawd
-
-## awdaw
-
-awdawd
-
-## dwaigga
-
-dawdaw
+- [x] Read and format vigilant state data
+- [x] Fit a Process-S dynamic model
+- [x] Fit an driven damped harmonic oscillator model
 
 
 # Package
