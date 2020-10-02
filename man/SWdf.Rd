@@ -3,27 +3,27 @@
 \docType{data}
 \name{SWdf}
 \alias{SWdf}
-\title{Arabidopsis QTL data on gravitropism}
+\title{C57BL/6J Sleep-Wake amount}
 \format{
-An object of class \code{"cross"}; see \code{\link[qtl]{read.cross}}.
-}
-\source{
-\href{https://phenome.jax.org/projects/Moore1b}{QTL Archive}
+A data.frame.
 }
 \usage{
 data(SWdf)
 }
 \description{
-Data from a QTL experiment on gravitropism in
-Arabidopsis, with data on 162 recombinant inbred lines (Ler x
-Cvi). The outcome is the root tip angle (in degrees) at two-minute
-increments over eight hours.
+Mean sleep-wake amount of 12 C57BL/6J mice.
+}
+\details{
+Time in [hours]
 }
 \examples{
 data(SWdf)
 }
 \references{
-Moore et al. (2013) Genetics 195:1077-1086
-(\href{https://www.ncbi.nlm.nih.gov/pubmed/23979570}{PubMed})
+Diessler et al. (2018) PLOS Biology 16:e2005750
+(\href{https://pubmed.ncbi.nlm.nih.gov/30091978/}{PubMed})
+
+Jan et al. (2019) Scientific Data, 6 (1) (2019), p. 258
+(\href{https://pubmed.ncbi.nlm.nih.gov/31672980/}{Pubmed})
 }
 \keyword{datasets}

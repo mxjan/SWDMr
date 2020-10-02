@@ -1,11 +1,11 @@
 Package: SWDMr
 Type: Package
-Title: Sleep-Wake driven model
-Version: 1.1
-Date: 2019-07-19
+Title: Sleep-Wake driven models
+Version: 1.2
+Date: 2020-10-02
 Author: Maxime Jan
 Maintainer: Maxime Jan <maxime.jan@unil.ch>
-Description: Sleep-Wake driven oscillator model.
+Description: R package to build sleep-Wake driven models and fit to phenotypes. Contains functions for sleep-wake data manipulation
 License: CC-BY
 Imports: Rcpp (>= 1.0.0)
 LinkingTo: Rcpp

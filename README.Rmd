@@ -22,6 +22,9 @@ output:
 - [x] Fit an driven damped harmonic oscillator model
 
 
+Statistical methods are inspired by Jake Yeung method for model selection. See [J.Yeung github](https://github.com/jakeyeung/SleepDepAnalysis) and [PNAS publication](https://doi.org/10.1073/pnas.1910590116)
+
+
 ```{r}
 library(SWDMr) # Package for model construction, objective function building
 
@@ -68,11 +71,229 @@ Sleep amount in the experiment
 ```{r}
 gg<-ggplot(aes(x=Time,y=Sleep),data=SWdf)+geom_line(color="darkblue",size=1)
 gg<-gg+scale_x_continuous(breaks=seq(0,96,by=12))
-gg<-gg+ylab("Sleep amount [h]")+xlab("Time [h]")
+gg<-gg+ylab("Sleep amount [h]")+xlab("Time [h]")+ theme_bw()
 gg
 ```
 
+
+
+# Fit a Driven Damped harmonic oscillator model
+
+In this model, sleep and wake change the phenotype speed and act as a force on the oscillator.
+
+We also use a second force driving the oscillator in the form of a sine-wave representing the
+force applied by the circadian systems to synchronize phenotypes to the current time.
+
+In this example, we model the dynamics of Arntl (Bmal1)
+
+## Data
+
+First we load data for time spent awake or asleep
+
+
+```{r}
+# Contain a data.frame of time spent asleep or awake
+data(SWdf)
+head(SWdf)
+```
+
+
+We then load phenotypes containing also time of sampling corresponding with the sleep-wake data.frame
+
+```{r}
+data(RNAExpression)
+head(RNAExpression)
+```
+
+
+## Create model
+
+We create a swdmr object containing sleep-wake data and phenotypes
+
+```{r}
+swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
+swdmr
+```
+
+We then initiate a model for a Driven Damped Harmonic Oscillator (DDHO)
+
+```{r}
+model<-initDDHOmodel(swdmr,VarExp = "Arntl")
+```
+
+In our model, we fix the equilibrium position to the mean expression of Arntl in baseline
+
+```{r}
+MeanGeneExprInBaseline<-mean(RNAExpression$Arntl[RNAExpression$Time<=48])
+model<-FixIntercept(model,MeanGeneExprInBaseline)
+```
+
+The force driving our oscillator are Sleep-Wake
+
+```{r}
+model<-AddForce(model,"Wake")
+model<-AddForce(model,"Sleep")
+```
+
+A second force is used, representing the sychronizing force with biological time (CT). 
+As mouse are under 12:12 LD cycle, this force has a 24h period
+
+```{r}
+model<-AddSinF(model,FixPer = 24)
+```
+
+
+Our model start at the equilibrium position with a speed of 0
+
+```{r}
+model<-SetYinitMode(model,mode = "Intercept_0")
+```
+
+We replicate baseline sleep-wake distribution to allow the oscillator to reach a stable oscillation
+
+```{r}
+model<-ReplicateDrivingForce(model,c(0,24.0),40)
+```
+
+
+This is our model:
+
+```{r}
+model
+```
+
+
+## Optimization
+
+We create an objective function:
+
+```{r}
+objfun<-SWDMrGetEvalFun(model)
+```
+
+We use optimx to optimize the free parameter to minimize the RSS
+
+```{r}
+# We assume the following starting parameters:
+
+# Natural frequency of our oscillator close to 24h
+# low damping
+params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
+# Many other algorithms and options exist ! See optimx manual to fit your needs. 
+# In this case you may want to limit the natural frequency of the oscillator below 
+# phenotype sampling rate and multiple start to avoid local optimum
+fits<-optimx(params,fn = objfun,method=c("nlminb"))
+fits
+```
+
+## Visualize fit
+
+Let see the fit
+
+```{r}
+out<-SWDMrFit(model,fits)
+```
+
+
+```{r,warning=F}
+# plot fitted lines
+gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
+gg<-gg+geom_line()
+# Add expression points
+gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Arntl)
+gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Arntl")
+gg
+```
+
+
+
+## Compute some statistics
+
+
+```{r}
+residuals<-SWDMrStats(model,out,detailed = T)$residuals
+fitted<-SWDMrStats(model,out,detailed = T)$fitted
+stats<-SWDMrStats(model,out,detailed = T)$stats
+```
+
+
+- Residual Sum of Square: RSS
+- Negative Log Likelihood: NLL
+- Bayesian Information Criterion: BIC
+- BIC of a linear model with an intercept only: BIC_flat
+- Bayes Factor between our model and a flat model: BayesFactor
+- Akaike Information Criterion: AIC
+- Number of samples in model: n
+- Number of free parameters: k
+- Variance of resiudals: ErrorVariance
+- Kendall's tau between data points and fit: KendalTau
+
+
+```{r}
+stats
+```
+
+
+*Here n=56 while dataset contains 62 points. Because fit was performed up to Time96 while last points reach Time 216 and 222. If these points needed to be integrated, then SWdf should go up to time 222*
+
+
+```{r}
+par(mfrow=c(1,2))
+plot(fitted,residuals);abline(h=mean(residuals))
+qqnorm(residuals);qqline(residuals)
+```
+
+## Other dynamics
+
+
+This model can also be applied to different dynamics like Homer1
+
+```{r}
+model<-initDDHOmodel(swdmr,VarExp = "Homer1")
+MeanGeneExprInBaseline<-mean(RNAExpression$Homer1[RNAExpression$Time<=48])
+model<-FixIntercept(model,MeanGeneExprInBaseline)
+model<-AddForce(model,"Wake")
+model<-AddForce(model,"Sleep")
+model<-AddSinF(model,FixPer = 24)
+model<-SetYinitMode(model,mode = "Intercept_0")
+model<-ReplicateDrivingForce(model,c(0,24.0),40)
+objfun<-SWDMrGetEvalFun(model)
+params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
+fits<-optimx(params,fn = objfun,method=c("nlminb"))
+out<-SWDMrFit(model,fits)
+gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
+gg<-gg+geom_line()
+gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Homer1)
+gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Homer1")
+gg
+```
+
+Acot11
+
+```{r}
+model<-initDDHOmodel(swdmr,VarExp = "Acot11")
+MeanGeneExprInBaseline<-mean(RNAExpression$Acot11[RNAExpression$Time<=48])
+model<-FixIntercept(model,MeanGeneExprInBaseline)
+model<-AddForce(model,"Wake")
+model<-AddForce(model,"Sleep")
+model<-AddSinF(model,FixPer = 24)
+model<-SetYinitMode(model,mode = "Intercept_0")
+model<-ReplicateDrivingForce(model,c(0,24.0),40)
+objfun<-SWDMrGetEvalFun(model)
+params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
+fits<-optimx(params,fn = objfun,method=c("nlminb"))
+out<-SWDMrFit(model,fits)
+gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
+gg<-gg+geom_line()
+gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Acot11)
+gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Acot11")
+gg
+```
+
+
 # Fit a process-S dynamic on phenotype
+
+This is a simplified version of process-S like driven phenotypes, see [J.Yeung github](https://github.com/jakeyeung/SleepDepAnalysis)
 
 First we load data for time spent awake or asleep
 
@@ -153,7 +374,7 @@ objfun<-SWDMrGetEvalFun(modelS)
 We use optimx to optimize the free parameter to minimize the RSS
 
 ```{r}
-paramsS<-c("AsympWake"=6,AsympSleep=4,TauWake=10,TauSleep=10)
+paramsS<-c(AsympWake=6,AsympSleep=4,TauWake=10,TauSleep=10)
 # Many other algorithms and options exist ! See optimx manual to fit your needs
 fitsS<-optimx(paramsS,fn = objfun,method=c("Nelder-Mead"))
 fitsS
@@ -174,7 +395,7 @@ gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=outS$time,fit=outS$y1))
 gg<-gg+geom_line()
 # Add expression points
 gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Homer1)
-gg<-gg + xlim(-24,96)
+gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw()
 gg
 ```
 
@@ -214,115 +435,6 @@ plot(fitted,residuals);abline(h=mean(residuals))
 qqnorm(residuals);qqline(residuals)
 ```
 
-
-# Driven Damped harmonic oscillator
-
-
-
-Build swdmr object
-
-```{r}
-## If you want a greater timestep for Rk4
-# SWdf<-SWdf[rep(seq_len(nrow(SWdf)), each = 10), ]
-# SWdf$Time<-seq(0.01,120.0,by=0.01)
-```
-
-
-```{r}
-swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
-swdmr
-```
-
-Initiate a Driven Damped Harmonic Oscillator [DDHO] model for a gene
-
-```{r}
-Gene<-"Arntl"
-model<-initDDHOmodel(swdmr,VarExp = Gene)
-```
-
-Set some parameter of our model
-
-```{r}
-# Mean expression in baseline between highest and lowest value
-MeanPerTime<-aggregate(RNAExpression[RNAExpression$Time <= 48,Gene],list(RNAExpression$Time[RNAExpression$Time <= 48]),mean)
-MeanGeneExprInBaseline<-(max(MeanPerTime$x)+min(MeanPerTime$x))/2
-
-# Fix the intercepts
-model<-FixIntercept(model,MeanGeneExprInBaseline)
-# Add sleep-wake force
-model<-AddForce(model,"Wake")
-model<-AddForce(model,"Sleep")
-
-# Start is set at intercept with speed of 0
-model<-SetYinitMode(model,mode = "Intercept_0",values = c(0,48))
-# We replicate baseline for 20 day
-model<-ReplicateDrivingForce(model,c(0,24.0),40)
-# A sin-wave force is applied with a period of 24h
-model<-AddSinF(model,FixPer = 24)
-# Compute the fit using RSS
-model<-SetFittingValue(model,value = "RSS")
-# Penalize the fitting for unstable value for 10 replicated days
-model<-PenalizeUnstableFit(model,value = T,PredictedValueInterval = c(0,48), StabilityDayCheck = 10)
-
-
-```
-
-summary of the model
-
-```{r}
-model
-```
-
-Fit data with optimx
-
-```{r}
-# Get objective function
-objfun<-SWDMrGetEvalFun(model)
-
-# 1st Fit
-params<-c(Wake=-0.1,Sleep=0.1,loggamma=log(1e-1),omega=2*pi/24,AmpSin=0,PhiSin=pi)
-fits<-optimx(params,fn = objfun,method=c("nlminb"),control=list(maxit=1000))
-
-fits
-
-if (! any(! is.na(fits$Wake))){
-  params<-c(Wake=0,Sleep=0,loggamma=log(1e-1),omega=2*pi/24,AmpSin=0,PhiSin=pi)
-  fits<-optimx(params,fn = objfun,method=c("newuoa"),control=list(maxit=10000))
-}
-
-if (any(fits$convcode == 0)){
-  fits<-fits[fits$convcode == 0,,drop=F]
-  optimxres<-fits[order(fits$value),,drop=F][1,]
-}else{
-  optimxres<-fits[order(fits$value),,drop=F][1,]
-}
-
-optimxres
-```
-
-
-Get fit
-
-```{r}
-out<-SWDMrFit(model,params = optimxres[1,])
-par(mfrow=c(2,1))
-plot(out$time,out$y1,type="l",ylab="Position",xlab="Time",xlim=c(0,120),xaxt="n")
-axis(1,seq(0,120,by=12),seq(0,120,by=12))
-plot(out$time,out$y2,type="l",xlab="Time",xlim=c(0,120),xaxt="n",ylab="RNA velocity",lwd=2)
-axis(1,seq(0,120,by=12),seq(0,120,by=12))
-```
-
-Get some statistics for the fit (R2, and AdjR2 are not valid measure ! Do not use them !)
-
-```{r}
-SWDMrStats(model,out,detailed = T)$stats
-```
-
-Plot fit and gene expression using ggplot2
-
-```{r}
-SWDMr:::StandardFittingPlot(model,optimxres[1,])
-```
 
 ```{r}
 sessionInfo()

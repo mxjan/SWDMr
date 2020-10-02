@@ -3,27 +3,28 @@
 \docType{data}
 \name{RNAExpression}
 \alias{RNAExpression}
-\title{Arabidopsis QTL data on gravitropism}
+\title{RNA-seq Time course}
 \format{
-An object of class \code{"cross"}; see \code{\link[qtl]{read.cross}}.
+A data.frame.
 }
 \source{
-\href{https://phenome.jax.org/projects/Moore1b}{QTL Archive}
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE140345}{Gene Expression Omnibus}
 }
 \usage{
 data(RNAExpression)
 }
 \description{
-Data from a QTL experiment on gravitropism in
-Arabidopsis, with data on 162 recombinant inbred lines (Ler x
-Cvi). The outcome is the root tip angle (in degrees) at two-minute
-increments over eight hours.
+Data for 3 genes (Homer1, Arntl & Acot11) expression in the
+mouse cortex, in a time-course experiment.
+}
+\details{
+Sleep deprivation was applied between Time48 and Time54
 }
 \examples{
 data(RNAExpression)
 }
 \references{
-Moore et al. (2013) Genetics 195:1077-1086
-(\href{https://www.ncbi.nlm.nih.gov/pubmed/23979570}{PubMed})
+C.N. Hor et al. (2019) PNAS 116 (51), 25773-25783
+(\href{https://pubmed.ncbi.nlm.nih.gov/31776259/}{PubMed})
 }
 \keyword{datasets}
