@@ -201,6 +201,7 @@ setMethod("SWDMrFit",signature="SWDMr_ProcS", function(object,params){
 })
 
 
+
 setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingValue="RSS",detailed=F){
   
   predv<-approxfun(fitted$time,fitted$y1)
@@ -213,46 +214,57 @@ setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingVa
   
   n <- length(GeneExp)
   
+  # Return only RSS | NLL | LL 
   if (detailed == F){
     if (length(predval) == 0){
-      return(1e30)
+      return(Inf)
     }else{
       RSS<-sum((GeneExp-predval)^2)
     }
     
+    # Return RSS 
     if (FittingValue == "RSS"){
       return(list(val=RSS,var=RSS/n))
+      
+      # Return Negative Log likelihood or Log Likelihood  
     }else{
+      
+      # biased estimator of sigma^2
       var<-RSS/n
-      LL <- sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+      
+      # Compute Negative log likelihood
+      NLL <- (n/2)*(log(2*pi)+log(var)+1)
+      
       if (FittingValue == "NLL"){
-        return(list(val=-LL,var=var))
+        return(list(val=NLL,var=var))
       }else if (FittingValue == "LL") {
-        return(list(val=LL,var=var))
+        return(list(val=-1*NLL,var=var))
       }
     }
+    
+    
   }else{
     
-    # N parameters
+    # Number of parameters
     k <- nrow(GetFreeFixedParams(object)$FreeParams)
     # residuals
     residualsV<-(GeneExp-predval)
     # Residuals sum of square
     RSS<-sum(residualsV^2)
-    # Variance
+    # biased estimator of sigma^2
     var<-RSS/n
     # Negative Log Likelihood
-    NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+    NLL<- (n/2)*(log(2*pi)+log(var)+1)
     # Bayesian Information Criterion
     BIC <- -2*(-NLL)+(k)*log(n)
     # Akaike information criterion
-    AIC <- 2*(k) + n*log(RSS/n)
+    AIC <- 2*(k) - 2*(-NLL)
     
     # FLAT MODEL
     lm_flat<-lm(GeneExp~1)
     RSS_flat<-sum(resid(lm_flat)^2)
     var_flat<-RSS_flat/n
-    NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
+    NLL_flat<- (n/2)*(log(2*pi)+log(var_flat)+1)
     BIC_flat <- -2*(-NLL_flat)+(1)*log(n)
     
     # Bayes Factor
@@ -265,11 +277,10 @@ setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingVa
                                            BIC=BIC,BIC_flat=BIC_flat,BayesFactor=BF_DDHOvFlat,
                                            AIC=AIC,n=n,k=k,ErrorVariance=var, KendalTau = KendalTau)), residuals = residualsV, fitted = predval ))
     
-    
   }
   
-  
 })
+
 
 setMethod("SWDMrGetEvalFun",signature="SWDMr_ProcS", function(object){
   

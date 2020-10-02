@@ -70,16 +70,19 @@ setClass(
   
 )
 
-############# Summaries ################
+######################################
+############# METHODS ################
+######################################
 
+
+####Return a matrix of free and fixed parameters
 setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
-  
+
+  # Matrix of free, fixed parameters  
   freeparams<-matrix(ncol=3,nrow=0)
   fixedparams<-matrix(ncol=3,nrow=0)
-  #freeparams<-data.frame(parameter = character(0),subparameter=character(0),value=numeric(0),stringsAsFactors = F)
-  #fixedparams<-data.frame(parameter = character(0),subparameter=character(0),value=numeric(0),stringsAsFactors = F)
-  
-  # Core params
+
+  # Core params as intercept [equilibrium], omega [nat. freq.], dampratio | loggamma
   if (object@UseDampingRatio == T){
     CoreParams<-c("intercept","omega","dampratio")
   }else{
@@ -87,55 +90,46 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   }
   for (param in CoreParams){
     if ( length(slot(object,param)) == 0){
-      #freeparams<-rbind(freeparams,data.frame(parameter="Core parameter",subparameter=param,value=NA,stringsAsFactors = F))
       freeparams<-rbind(freeparams,c("Core parameter",param,NA))
     }else{
-      #fixedparams<-rbind(fixedparams,data.frame(parameter="Core parameter",subparameter=param,value=slot(object,param),stringsAsFactors = F))
       fixedparams<-rbind(fixedparams,c("Core parameter",param,slot(object,param)))
     }
-    #if ( length(slot(object,param)) == 0){freeparams[param] = T}else{fixedparams[param]<-slot(object,param)}
   }
   
-  # Forces
+  # add Forces of the model
   if (length(slot(object,"Forces")) > 0){
     for (ForceName in names(slot(object,"Forces"))){
       if (length(object@Forces[[ForceName]]) == 0){
         freeparams<-rbind(freeparams,c("Forces",ForceName,NA))
-        #freeparams<-rbind(freeparams,data.frame(parameter="Forces",subparameter=ForceName,value=NA,stringsAsFactors = F))
       }else{
-        #fixedparams<-rbind(fixedparams,data.frame(parameter="Forces",subparameter=ForceName,value=object@Forces[[ForceName]],stringsAsFactors = F))
         fixedparams<-rbind(fixedparams,c("Forces",ForceName,object@Forces[[ForceName]]))
       }
     }
   }
   
-  # Add Effect
+  # Simple Additive Effects
   if (length(slot(object,"AddEffects")) > 0){
     for (AddEffect in names(slot(object,"AddEffects"))){
       if (length(object@AddEffects[[AddEffect]]) == 0){
         freeparams<-rbind(freeparams,c("AddEffects",AddEffectAddEffect,NA))
-        #freeparams<-rbind(freeparams,data.frame(parameter="AddEffects",subparameter=AddEffect,value=NA,stringsAsFactors = F))
       }else{
-        #fixedparams<-rbind(fixedparams,data.frame(parameter="AddEffects",subparameter=AddEffect,value=object@AddEffects[[AddEffect]],stringsAsFactors = F))
         fixedparams<-rbind(fixedparams,c("AddEffects",AddEffect,object@AddEffects[[AddEffect]]))
       }
     }
   }
   
-  # Sin force
+  # Sinewave force 
   if (slot(object,"SinForce") == T){
     for (SinFparam in c("AmpSin","PhiSin","PerSin")){
       if (length(slot(object,SinFparam)) == 0){
         freeparams<-rbind(freeparams,c("SinForce",SinFparam,NA))
-        #freeparams<-rbind(freeparams,data.frame(parameter="SinForce",subparameter=SinFparam,value=NA,stringsAsFactors = F))
       }else{
         fixedparams<-rbind(fixedparams,c("SinForce",SinFparam,slot(object,SinFparam)))
-        #fixedparams<-rbind(fixedparams,data.frame(parameter="SinForce",subparameter=SinFparam,value=slot(object,SinFparam),stringsAsFactors = F))
       }
     }
   }
   
-  # Yinit mode
+  # Yinit mode (initial position and speed)
   if (object@initmod == "Free"){
     freeparams<-rbind(freeparams,c("Yinit","start_pos",NA))
     freeparams<-rbind(freeparams,c("Yinit","start_speed",NA))
@@ -154,7 +148,7 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   
 })
 
-
+# Display the parameter matrix
 setMethod("ShowFreeParams","SWDMr_DDHO",function(object,...) {
   
   cat("~~~~~~~~~~~ Current parameter setting ~~~~~~~~~~ \n\n")
@@ -183,7 +177,7 @@ setMethod("ShowFreeParams","SWDMr_DDHO",function(object,...) {
   
 })
 
-
+# Summary function
 setMethod("summary", "SWDMr_DDHO", function(object) {
   cat("~~~~~~~~ This is a S4 SWDMr_DDHO object ~~~~~~~~ \n\n")
   cat("Display the current setting for your fitting\n\n")
@@ -211,7 +205,6 @@ setMethod("FixIntercept",signature="SWDMr_DDHO", function(object,value){
 
 
 setMethod("AddForce",signature="SWDMr_DDHO", function(object,ForceName,value=numeric(0)){
-  
   if (! ForceName %in% colnames(object@SWdist)){
    stop("Force not in SWdist data.frame !") 
   }
@@ -247,7 +240,8 @@ setMethod("SetYinitMode",signature="SWDMr_DDHO", function(object,mode="Free",val
     
     omega<-(2*pi)/24
     
-    reslm <- lm(GexpCirca ~ sin(omega*TimeCirca)+cos(omega*TimeCirca)) # Fit
+    # Fit a cosine to phenotype, will be used to estimate start and speed of the oscillator
+    reslm <- lm(GexpCirca ~ sin(omega*TimeCirca)+cos(omega*TimeCirca))
     t1<-object@SWdist[1,"Time"]
     t2<-object@SWdist[2,"Time"]
     timestep<-t2-t1
@@ -255,11 +249,6 @@ setMethod("SetYinitMode",signature="SWDMr_DDHO", function(object,mode="Free",val
     
     post0<-as.numeric(reslm$coefficients[1]+reslm$coefficients[2]*sin(omega*t0)+ # position at t0
                         reslm$coefficients[3]*cos(omega*t0))
-    # postm1<-as.numeric(reslm$coefficients[1]+reslm$coefficients[2]*sin(((2*pi)/24)*(t0-timestep))+ # position at t0-t1
-    #                      reslm$coefficients[3]*cos(((2*pi)/24)*(t0-timestep)))
-    # speedt0<- (post0 - postm1) / timestep
-    # 
-    
     if (any(c(is.na(reslm$coefficients[2]),is.na(reslm$coefficients[3])))){stop("Fit failed in the given interval")}
     
     # Initial position @ T0
@@ -272,38 +261,30 @@ setMethod("SetYinitMode",signature="SWDMr_DDHO", function(object,mode="Free",val
     object@initpos <- 0
     object@initspeed <- 0
   } else {
-    
     stop("Mode not found")
-    
   }
-  
   return(object)
 })
 
-
+# Add a force in the form of a sinewave
 setMethod("AddSinF",signature="SWDMr_DDHO", function(object,FixAmp=numeric(0),FixPhi=numeric(0),FixPer=numeric(0)){
-  
   object@SinForce<-T
   object@AmpSin<-FixAmp
   object@PhiSin<-FixPhi
   object@PerSin<-FixPer
-
   return(object)
 })
 
-
+# Value returned by the objective function as Residual Sum of Square (RSS), Negative log-likelihood or Likelihood
 setMethod("SetFittingValue",signature="SWDMr_DDHO", function(object,value = "RSS"){
-  
   if (! value %in% c("RSS","NLL","LL")){
     stop("The returned value should be RSS, NLL or LL")
   }
-  
   object@FittingValue <- value
-  
   return(object)
 })
 
-
+# Set a penalization of the objective function for unstable oscillation
 setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = T,PredictedValueInterval,StabilityDayCheck,weight=1){
   
   # Set penalization to True
@@ -320,31 +301,25 @@ setMethod("PenalizeUnstableFit",signature="SWDMr_DDHO", function(object,value = 
 })
 
 
+# Add forces given in the model
 setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=NULL){
   
   if (is.null(allparams)){
     allparams<-GetAllParams(object,params)
   }
-  
   idxForces<-which(allparams$parameter == "Forces")
   if (length(idxForces) > 0){
     Forces<-allparams[idxForces,"value"]
     SWf<-object@SWdist[,allparams[idxForces,"subparameter"],drop=F]
     Force <- (as.matrix(SWf) %*% Forces)[,1]
-    # SWf<-as.matrix(mapply(`*`,SWf,Forces))
-    # if (length(Forces) > 1){
-    #   Force<-rowSums(SWf)
-    # }else{
-    #   Force<-SWf[,1]
-    # }
   }else{
     Force<-rep(0,nrow(object@SWdist))
   }
-  
   return(Force)
   
 })
 
+# function to return the fitted values given parameters
 setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   
   # Control parameters given
@@ -365,7 +340,6 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
     gamma <- allparams$value[dampratio_idx] / (2*allparams$value[omega_idx])
   }
 
-  
   # Initial position
   if (object@initmod == "Fixed" || object@initmod == "CircadianFit"){y.init = c(object@initpos-intercept, object@initspeed)}
   if (object@initmod == "Intercept_0"){y.init = c(0, 0)}
@@ -392,13 +366,13 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
     PerSin<-24
   }
   
-  # Fit
-  out<-SWDMr:::SDDHO_SinF_RungeKutta(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin) # Solve ODE, see src/sddho_sinforce_RK4.cpp
+  # Fit# Solve ODE, see src/sddho_sinforce_RK4.cpp
+  out<-SWDMr:::SDDHO_SinF_RungeKutta(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin) 
   
   # Add intercept to data
   out$y1 <- out$y1 + intercept
   
-  # Add additive parameters
+  # Add potential additive effects
   Addparams_idx<-which(allparams$parameter == "AddEffects")
   if (length(Addparams_idx) > 0){
     Addeffs<-allparams[Addparams_idx,"value"]
@@ -416,7 +390,7 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
   
 })
 
-
+# Apply unstable oscillation penalization of the fit
 setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fitted,FittingValue,val,var,weight=1){
   
   # Weight
@@ -442,19 +416,17 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
   obs<-c(obsmin,obsmax )
   pred<-c(rep(min(sodeinterval),length(obsmin)),rep(max(sodeinterval),length(obsmax)))
   
+  penalization<-sum((pred-obs)^2)*weight
+  
   if (FittingValue == "RSS"){
-    return(val+sum((pred-obs)^2)*weight)
+    return(val+penalization)
   }
-  if (FittingValue == "NLL"){
-    # transform in LL
-    val <- -val
-    # Add likelihood
-    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))*weight
-    # Return NLL
-    return(-val)
+  else if (FittingValue == "NLL"){
+    val <- val+penalization
+    return(val)
   }
-  if (FittingValue == "LL"){
-    val <- val+sum(dnorm(obs,mean=pred,sd=sqrt(var),log=T))*weight
+  else if (FittingValue == "LL"){
+    val <- val-penalization
     return(val)
   }
 })
@@ -473,46 +445,57 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
   
   n <- length(GeneExp)
   
+  # Return only RSS | NLL | LL 
   if (detailed == F){
     if (length(predval) == 0){
-      return(1e30)
+      return(Inf)
     }else{
       RSS<-sum((GeneExp-predval)^2)
     }
     
+    # Return RSS 
     if (FittingValue == "RSS"){
       return(list(val=RSS,var=RSS/n))
+      
+    # Return Negative Log likelihood or Log Likelihood  
     }else{
+      
+      # biased estimator of sigma^2
       var<-RSS/n
-      LL <- sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+      
+      # Compute Negative log likelihood
+      NLL <- (n/2)*(log(2*pi)+log(var)+1)
+
       if (FittingValue == "NLL"){
-        return(list(val=-LL,var=var))
+        return(list(val=NLL,var=var))
       }else if (FittingValue == "LL") {
-        return(list(val=LL,var=var))
+        return(list(val=-1*NLL,var=var))
       }
     }
+    
+    
   }else{
     
-    # N parameters
+    # Number of parameters
     k <- nrow(GetFreeFixedParams(object)$FreeParams)
     # residuals
     residualsV<-(GeneExp-predval)
     # Residuals sum of square
     RSS<-sum(residualsV^2)
-    # Variance
+    # biased estimator of sigma^2
     var<-RSS/n
     # Negative Log Likelihood
-    NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
+    NLL<- (n/2)*(log(2*pi)+log(var)+1)
     # Bayesian Information Criterion
     BIC <- -2*(-NLL)+(k)*log(n)
     # Akaike information criterion
-    AIC <- 2*(k) + n*log(RSS/n)
+    AIC <- 2*(k) - 2*(-NLL)
     
     # FLAT MODEL
     lm_flat<-lm(GeneExp~1)
     RSS_flat<-sum(resid(lm_flat)^2)
     var_flat<-RSS_flat/n
-    NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
+    NLL_flat<- (n/2)*(log(2*pi)+log(var_flat)+1)
     BIC_flat <- -2*(-NLL_flat)+(1)*log(n)
     
     # Bayes Factor
@@ -525,48 +508,7 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
                               BIC=BIC,BIC_flat=BIC_flat,BayesFactor=BF_DDHOvFlat,
                               AIC=AIC,n=n,k=k,ErrorVariance=var, KendalTau = KendalTau)), residuals = residualsV, fitted = predval ))
     
-    
-    # k <- nrow(GetFreeFixedParams(object)$FreeParams)
-    # 
-    # # R2 NOT VALID FOR NON LINEAR MODELS ! DOES NOT ADD UP TO 100 !!
-    # # https://statisticsbyjim.com/regression/r-squared-invalid-nonlinear-regression/
-    # # Use Standard Error of regression https://statisticsbyjim.com/regression/standard-error-regression-vs-r-squared/
-    # # SEE SOME STATS HERE: http://sia.webpopix.org/nonlinearRegression.html
-    # # See Note on the R2 measure of goodness of fit for nonlinear models (TARALD O. KVALSETH, 1983)
-    # RSS<-sum((GeneExp-predval)^2)
-    # MSS<-sum((predval - mean(predval))^2)
-    # R2<-MSS/(MSS+RSS)
-    # 
-    # rdf<-n-k
-    # AdjR2<- 1 - (1-R2) * ((n - 1)/rdf)
-    # 
-    # resvar <- RSS/rdf
-    # Fstat<-(MSS/(k - 1))/resvar
-    # pvalF<-1-pf(Fstat,k-1,rdf)
-    # 
-    # var<-RSS/n
-    # NLL<- -1* sum(dnorm(GeneExp,mean=predval,sd=sqrt(var),log=T))
-    # # Faster ?
-    # #((-n/2)*log(2*pi)) - ((n/2)*log(sigma2)) - (RSS/(2*var))
-    # 
-    # BIC <- -2*(-NLL)+(k+1)*log(n) # add variance as parameter
-    # AIC <- 2*(k+1) + n*log(RSS/n)
-    # 
-    # # Flat model
-    # lm_flat<-lm(GeneExp~1)
-    # RSS_flat<-sum(resid(lm_flat)^2)
-    # var_flat<-RSS_flat/n
-    # NLL_flat<- -1* ( ((-n/2)*log(2*pi)) - ((n/2)*log(var_flat)) - (RSS_flat/(2*var_flat)) )
-    # BIC_flat <- -2*(-NLL_flat)+(1+1)*log(n)
-    # BF_DDHOvFlat<-exp((BIC_flat-BIC)/2)
-    # 
-    # 
-    # return(as.data.frame(list(Variable=object@VarExp,RSS=RSS,NLL=NLL,
-    #                           BIC=BIC,BIC_flat=BIC_flat,BayesFactor=BF_DDHOvFlat,
-    #                           AIC=AIC,R2=R2,AdjR2=AdjR2,Fstat=Fstat,pvalF=pvalF,numdf=k-1,rdf=rdf,n=n,k=k,ErrorVariance=var)))
-  
   }
-
 
 })
 
