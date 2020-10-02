@@ -4,7 +4,7 @@ author: Maxime Jan
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   md_document:
-    variant: markdown_github
+    variant: gfm
     toc: true
     toc_depth: 2
 ---
@@ -33,9 +33,9 @@ library(ggplot2) # Package for visualization
 
 Get vigilant state of mice. Each row is a 4 seconds epoch containing the vigilant state of the mouse
 
-Wake = w | 1
-NREM sleep = n | 2
-REM sleep = r | 3
+- Wake = w | 1
+- NREM sleep = n | 2
+- REM sleep = r | 3
 
 ```{r}
 data(SleepWakeData)
@@ -156,6 +156,7 @@ paramsS<-c("AsympWake"=6,AsympSleep=4,TauWake=10,TauSleep=10)
 fitsS<-optimx(paramsS,fn = objfun,method=c("Nelder-Mead"))
 fitsS
 ```
+
 ## Visualize fit
 
 Let see the fit
@@ -200,6 +201,8 @@ stats<-SWDMrStats(modelS,outS,detailed = T)$stats
 ```{r}
 stats
 ```
+
+
 *Here n=56 while dataset contains 62 points. Because fit was performed up to Time96 while last points reach Time 216 and 222. If these points needed to be integrated, then SWdf should go up to time 222*
 
 
@@ -211,7 +214,7 @@ qqnorm(residuals);qqline(residuals)
 
 # Driven Damped harmonic oscillator
 
-$$m\frac{d^2x}{dt^2} + m\gamma\frac{dx}{dt} + m\omega^2_{0}x = F(t)$$
+
 
 Build swdmr object
 

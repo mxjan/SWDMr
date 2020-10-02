@@ -5,7 +5,7 @@
 \title{Create a dataframe with Sleep-wake distribution, Time and Day}
 \usage{
 Read_SW(
-  files,
+  Mres,
   concat = "mean",
   nepochs = 86400,
   epochlengthsec = 4,
@@ -30,7 +30,7 @@ dataframe
 Details in description
 }
 \examples{
-files <- list.files(path="Data/",pattern = paste("^","BL6",sep=""),full.names = T)
-SWdf<-Read_SW(files)
+data(SleepWakeData)
+SWdf<-Read_SW(SleepWakeData)
 
 }
