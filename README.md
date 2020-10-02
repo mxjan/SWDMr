@@ -256,7 +256,7 @@ fits
     ##            omega  loggamma      Wake      Sleep      AmpSin   PhiSin     value
     ## nlminb 0.2157555 -2.192577 0.1128973 -0.2237861 0.006161537 3.710265 0.3754079
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     51    240    35        0 TRUE TRUE  0.51
+    ## nlminb     51    240    35        0 TRUE TRUE   0.5
 
 ## Visualize fit
 
@@ -304,7 +304,7 @@ stats
 ```
 
     ##   Variable       RSS       NLL       BIC BIC_flat  BayesFactor       AIC  n k
-    ## 1    Arntl 0.3754079 -60.68207 -97.21203 13.06533 8.839435e+23 -268.2853 56 6
+    ## 1    Arntl 0.3754079 -60.68207 -97.21203 13.06533 8.839435e+23 -109.3641 56 6
     ##   ErrorVariance KendalTau
     ## 1   0.006703712 0.7531092
 
@@ -568,7 +568,7 @@ stats
 ```
 
     ##   Variable      RSS       NLL      BIC BIC_flat  BayesFactor       AIC  n k
-    ## 1   Homer1 2.670078 -5.750276 4.600854 93.52109 2.036032e+19 -162.4217 56 4
+    ## 1   Homer1 2.670078 -5.750276 4.600854 93.52109 2.036032e+19 -3.500553 56 4
     ##   ErrorVariance KendalTau
     ## 1    0.04767996 0.7397206
 
