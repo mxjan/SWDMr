@@ -6,6 +6,9 @@ output:
   github_document:
     toc: true
     toc_depth: 2
+    fig_width: 6
+    fig_height: 4
+    dev: jpeg
 ---
 
 # Sleep-Wake Driven Models, an R package [SWDMr]
@@ -62,7 +65,7 @@ head(SWdf)
 
 Sleep amount in the experiment
 
-```{r,fig.width=6,fig.height=3}
+```{r}
 gg<-ggplot(aes(x=Time,y=Sleep),data=SWdf)+geom_line(color="darkblue",size=1)
 gg<-gg+scale_x_continuous(breaks=seq(0,96,by=12))
 gg<-gg+ylab("Sleep amount [h]")+xlab("Time [h]")
@@ -165,7 +168,7 @@ outS<-SWDMrFit(modelS,fitsS)
 ```
 
 
-```{r,fig.width=6,fig.height=3}
+```{r,warning=F}
 # plot fitted lines
 gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=outS$time,fit=outS$y1))
 gg<-gg+geom_line()
@@ -206,6 +209,7 @@ stats
 
 
 ```{r}
+par(mfrow=c(1,2))
 plot(fitted,residuals);abline(h=mean(residuals))
 qqnorm(residuals);qqline(residuals)
 ```

@@ -96,7 +96,7 @@ gg<-gg+ylab("Sleep amount [h]")+xlab("Time [h]")
 gg
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.jpeg)<!-- -->
 
 # Fit a process-S dynamic on phenotype
 
@@ -257,11 +257,7 @@ gg<-gg + xlim(-24,96)
 gg
 ```
 
-    ## Warning: Removed 2399 row(s) containing missing values (geom_path).
-
-    ## Warning: Removed 9 rows containing missing values (geom_point).
-
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.jpeg)<!-- -->
 
 ## Compute some statistics
 
@@ -298,16 +294,12 @@ up to Time96 while last points reach Time 216 and 222. If these points
 needed to be integrated, then SWdf should go up to time 222*
 
 ``` r
+par(mfrow=c(1,2))
 plot(fitted,residuals);abline(h=mean(residuals))
-```
-
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
-
-``` r
 qqnorm(residuals);qqline(residuals)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.jpeg)<!-- -->
 
 # Driven Damped harmonic oscillator
 
@@ -433,7 +425,7 @@ plot(out$time,out$y2,type="l",xlab="Time",xlim=c(0,120),xaxt="n",ylab="RNA veloc
 axis(1,seq(0,120,by=12),seq(0,120,by=12))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-27-1.jpeg)<!-- -->
 
 Get some statistics for the fit (R2, and AdjR2 are not valid measure \!
 Do not use them \!)
@@ -453,7 +445,7 @@ Plot fit and gene expression using ggplot2
 SWDMr:::StandardFittingPlot(model,optimxres[1,])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.jpeg)<!-- -->
 
 ``` r
 sessionInfo()
@@ -486,6 +478,6 @@ sessionInfo()
     ## [19] digest_0.6.25       tibble_3.0.1        lifecycle_0.2.0    
     ## [22] crayon_1.3.4        numDeriv_2016.8-1.1 farver_2.0.3       
     ## [25] purrr_0.3.4         vctrs_0.3.1         glue_1.4.1         
-    ## [28] evaluate_0.14       rmarkdown_2.2       labeling_0.3       
+    ## [28] evaluate_0.14       rmarkdown_2.4       labeling_0.3       
     ## [31] stringi_1.4.6       compiler_4.0.1      pillar_1.4.4       
     ## [34] generics_0.0.2      scales_1.1.1        pkgconfig_2.0.3
