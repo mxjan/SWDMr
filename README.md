@@ -1,3 +1,8 @@
+Examples
+================
+Maxime Jan
+02 octobre, 2020
+
   - [Sleep-Wake Driven Models, an R package
     \[SWDMr\]](#sleep-wake-driven-models-an-r-package-swdmr)
   - [Format vigilant state](#format-vigilant-state)
@@ -232,7 +237,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.56
+    ## Nelder-Mead        1 FALSE FALSE  0.58
 
 ## Visualize fit
 
@@ -394,7 +399,7 @@ fits
     ##             Wake      Sleep  loggamma     omega      AmpSin   PhiSin     value
     ## nlminb 0.1580769 -0.1786065 -2.192577 0.2157555 0.006161535 3.710265 0.3754079
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     36    178    25        0 TRUE TRUE  0.56
+    ## nlminb     36    178    25        0 TRUE TRUE  0.58
 
 ``` r
 if (! any(! is.na(fits$Wake))){
@@ -415,7 +420,7 @@ optimxres
     ##             Wake      Sleep  loggamma     omega      AmpSin   PhiSin     value
     ## nlminb 0.1580769 -0.1786065 -2.192577 0.2157555 0.006161535 3.710265 0.3754079
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     36    178    25        0 TRUE TRUE  0.56
+    ## nlminb     36    178    25        0 TRUE TRUE  0.58
 
 Get fit
 

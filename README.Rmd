@@ -3,8 +3,7 @@ title: "Examples"
 author: Maxime Jan
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  md_document:
-    variant: gfm
+  github_document:
     toc: true
     toc_depth: 2
 ---
