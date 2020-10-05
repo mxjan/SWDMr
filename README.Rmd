@@ -115,9 +115,12 @@ swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
 swdmr
 ```
 
+Simulation goes up to T96 but some points in RNA expression data.frame goes up to T222
+
+
 We then initiate a model for a Driven Damped Harmonic Oscillator (DDHO)
 
-```{r}
+```{r,warning=F}
 model<-initDDHOmodel(swdmr,VarExp = "Arntl")
 ```
 
@@ -151,7 +154,7 @@ model<-SetYinitMode(model,mode = "Intercept_0")
 
 We replicate baseline sleep-wake distribution to allow the oscillator to reach a stable oscillation
 
-```{r}
+```{r,warning=F}
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
 ```
 
@@ -253,7 +256,7 @@ qqnorm(residuals);qqline(residuals)
 
 This model can also be applied to different dynamics like Homer1
 
-```{r}
+```{r,warning=F}
 model<-initDDHOmodel(swdmr,VarExp = "Homer1")
 MeanGeneExprInBaseline<-mean(RNAExpression$Homer1[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
@@ -277,11 +280,14 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 
 gg
 
+# Stats
+SWDMrStats(model,out,detailed = T)$stats
+
 ```
 
 Acot11
 
-```{r}
+```{r,warning=F}
 model<-initDDHOmodel(swdmr,VarExp = "Acot11")
 MeanGeneExprInBaseline<-mean(RNAExpression$Acot11[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
@@ -304,10 +310,13 @@ SWdv<-SWdrivenValue(model,fits,c(0,24))
 gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
 
 gg
+
+# Stats
+SWDMrStats(model,out,detailed = T)$stats
 ```
 
 
-```{r}
+```{r,warning=F}
 model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
 MeanGeneExprInBaseline<-mean(RNAExpression$Cyth3[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
@@ -331,6 +340,9 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 
 gg
 
+
+# Stats
+SWDMrStats(model,out,detailed = T)$stats
 ```
 
 
@@ -361,20 +373,20 @@ Let's model the dynamics of Homer1
 
 We create a swdmr object containing sleep-wake data and phenotypes
 
-```{r}
+```{r,warning=F}
 swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
 swdmr
 ```
 
 We then initiate a model for a process-S dynamics
 
-```{r}
+```{r,warning=F}
 modelS<-initProcessSmodel(swdmr,VarExp = "Homer1")
 ```
 
 We replicate the baseline time (time0-time24) 10x to have a stable baseline dynamics
 
-```{r}
+```{r,warning=F}
 modelS<-ReplicateDrivingForce(modelS,c(0,24.0),10)
 ```
 

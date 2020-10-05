@@ -176,19 +176,14 @@ swdmr
     ## This object contains:  4 Genes Over 62 Time points
     ## Your force data frame contain 1200 values with the following possible forces:NREM;REM;Wake;Sleep;LenW;LenS;Day;Time;Light;Dark;SD
 
+Simulation goes up to T96 but some points in RNA expression data.frame
+goes up to T222
+
 We then initiate a model for a Driven Damped Harmonic Oscillator (DDHO)
 
 ``` r
 model<-initDDHOmodel(swdmr,VarExp = "Arntl")
 ```
-
-    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
 
 In our model, we fix the equilibrium position to the mean expression of
 Arntl in baseline
@@ -225,14 +220,6 @@ reach a stable oscillation
 ``` r
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
 ```
-
-    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
 
 This is our model:
 
@@ -283,7 +270,7 @@ fits
     ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
     ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.37
+    ## nlminb     55    214    32        0 TRUE TRUE  0.38
 
 ## Visualize fit
 
@@ -357,17 +344,6 @@ This model can also be applied to different dynamics like Homer1
 
 ``` r
 model<-initDDHOmodel(swdmr,VarExp = "Homer1")
-```
-
-    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
-``` r
 MeanGeneExprInBaseline<-mean(RNAExpression$Homer1[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
@@ -375,17 +351,6 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
-```
-
-    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
-``` r
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -402,27 +367,22 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 gg
 ```
 
-    ## Warning: Removed 9600 row(s) containing missing values (geom_path).
-
-    ## Warning: Removed 9 rows containing missing values (geom_point).
-
 ![](README_files/figure-gfm/unnamed-chunk-22-1.jpeg)<!-- -->
+
+``` r
+# Stats
+SWDMrStats(model,out,detailed = T)$stats
+```
+
+    ##   Variable      RSS       NLL      BIC BIC_flat  BayesFactor      AIC  n k
+    ## 1   Homer1 2.748343 -4.941335 14.26944 93.52109 1.619116e+17 2.117329 56 6
+    ##   ErrorVariance KendalTau
+    ## 1    0.04907756 0.7397206
 
 Acot11
 
 ``` r
 model<-initDDHOmodel(swdmr,VarExp = "Acot11")
-```
-
-    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
-``` r
 MeanGeneExprInBaseline<-mean(RNAExpression$Acot11[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
@@ -430,17 +390,6 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
-```
-
-    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
-``` r
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -457,25 +406,20 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 gg
 ```
 
-    ## Warning: Removed 9600 row(s) containing missing values (geom_path).
-
-    ## Warning: Removed 9 rows containing missing values (geom_point).
-
 ![](README_files/figure-gfm/unnamed-chunk-23-1.jpeg)<!-- -->
 
 ``` r
-model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
+# Stats
+SWDMrStats(model,out,detailed = T)$stats
 ```
 
-    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
+    ##   Variable       RSS       NLL       BIC  BIC_flat BayesFactor       AIC  n k
+    ## 1   Acot11 0.5012828 -52.58566 -81.01922 -49.95585     5563197 -93.17133 56 6
+    ##   ErrorVariance KendalTau
+    ## 1   0.008951479  0.572363
 
 ``` r
+model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
 MeanGeneExprInBaseline<-mean(RNAExpression$Cyth3[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
@@ -483,17 +427,6 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
-```
-
-    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
-``` r
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -510,11 +443,17 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 gg
 ```
 
-    ## Warning: Removed 9600 row(s) containing missing values (geom_path).
-
-    ## Warning: Removed 9 rows containing missing values (geom_point).
-
 ![](README_files/figure-gfm/unnamed-chunk-24-1.jpeg)<!-- -->
+
+``` r
+# Stats
+SWDMrStats(model,out,detailed = T)$stats
+```
+
+    ##   Variable      RSS       NLL       BIC  BIC_flat BayesFactor       AIC  n k
+    ## 1    Cyth3 0.162987 -84.04366 -143.9352 -101.8929  1347009900 -156.0873 56 6
+    ##   ErrorVariance KendalTau
+    ## 1   0.002910482 0.5319461
 
 # Fit a process-S dynamic on phenotype
 
@@ -563,17 +502,6 @@ We create a swdmr object containing sleep-wake data and phenotypes
 
 ``` r
 swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
-```
-
-    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
-``` r
 swdmr
 ```
 
@@ -587,28 +515,12 @@ We then initiate a model for a process-S dynamics
 modelS<-initProcessSmodel(swdmr,VarExp = "Homer1")
 ```
 
-    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-
 We replicate the baseline time (time0-time24) 10x to have a stable
 baseline dynamics
 
 ``` r
 modelS<-ReplicateDrivingForce(modelS,c(0,24.0),10)
 ```
-
-    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T216 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
-    ## - Point T222 not found
 
 We fix the starting point as mean expression level
 
@@ -685,7 +597,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.48
+    ## Nelder-Mead        1 FALSE FALSE  0.47
 
 ## Visualize fit
 
