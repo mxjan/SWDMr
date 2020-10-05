@@ -1,7 +1,7 @@
 Examples
 ================
 Maxime Jan
-02 octobre, 2020
+05 octobre, 2020
 
   - [Sleep-Wake Driven Models, an R package
     \[SWDMr\]](#sleep-wake-driven-models-an-r-package-swdmr)
@@ -158,6 +158,17 @@ We create a swdmr object containing sleep-wake data and phenotypes
 
 ``` r
 swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
+```
+
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
 swdmr
 ```
 
@@ -170,6 +181,14 @@ We then initiate a model for a Driven Damped Harmonic Oscillator (DDHO)
 ``` r
 model<-initDDHOmodel(swdmr,VarExp = "Arntl")
 ```
+
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
 
 In our model, we fix the equilibrium position to the mean expression of
 Arntl in baseline
@@ -206,6 +225,14 @@ reach a stable oscillation
 ``` r
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
 ```
+
+    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
 
 This is our model:
 
@@ -253,10 +280,10 @@ fits<-optimx(params,fn = objfun,method=c("nlminb"))
 fits
 ```
 
-    ##            omega  loggamma      Wake      Sleep      AmpSin   PhiSin     value
-    ## nlminb 0.2157555 -2.192577 0.1128973 -0.2237861 0.006161537 3.710265 0.3754079
+    ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
+    ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     51    240    35        0 TRUE TRUE   0.5
+    ## nlminb     55    214    32        0 TRUE TRUE  0.38
 
 ## Visualize fit
 
@@ -303,10 +330,10 @@ stats<-SWDMrStats(model,out,detailed = T)$stats
 stats
 ```
 
-    ##   Variable       RSS       NLL       BIC BIC_flat  BayesFactor       AIC  n k
-    ## 1    Arntl 0.3754079 -60.68207 -97.21203 13.06533 8.839435e+23 -109.3641 56 6
+    ##   Variable       RSS       NLL      BIC BIC_flat  BayesFactor       AIC  n k
+    ## 1    Arntl 0.3719629 -60.94021 -97.7283 13.06533 1.144275e+24 -109.8804 56 6
     ##   ErrorVariance KendalTau
-    ## 1   0.006703712 0.7531092
+    ## 1   0.006642194 0.7598035
 
 *Here n=56 while dataset contains 62 points. Because fit was performed
 up to Time96 while last points reach Time 216 and 222. If these points
@@ -326,6 +353,17 @@ This model can also be applied to different dynamics like Homer1
 
 ``` r
 model<-initDDHOmodel(swdmr,VarExp = "Homer1")
+```
+
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
 MeanGeneExprInBaseline<-mean(RNAExpression$Homer1[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
@@ -333,6 +371,17 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+```
+
+    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -354,6 +403,17 @@ Acot11
 
 ``` r
 model<-initDDHOmodel(swdmr,VarExp = "Acot11")
+```
+
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
 MeanGeneExprInBaseline<-mean(RNAExpression$Acot11[RNAExpression$Time<=48])
 model<-FixIntercept(model,MeanGeneExprInBaseline)
 model<-AddForce(model,"Wake")
@@ -361,6 +421,17 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+```
+
+    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -425,6 +496,17 @@ We create a swdmr object containing sleep-wake data and phenotypes
 
 ``` r
 swdmr <- SWDMr(SWdist=SWdf, Gexp=RNAExpression)
+```
+
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
 swdmr
 ```
 
@@ -438,12 +520,28 @@ We then initiate a model for a process-S dynamics
 modelS<-initProcessSmodel(swdmr,VarExp = "Homer1")
 ```
 
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
 We replicate the baseline time (time0-time24) 10x to have a stable
 baseline dynamics
 
 ``` r
 modelS<-ReplicateDrivingForce(modelS,c(0,24.0),10)
 ```
+
+    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
 
 We fix the starting point as mean expression level
 
@@ -520,7 +618,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.56
+    ## Nelder-Mead        1 FALSE FALSE  0.47
 
 ## Visualize fit
 
