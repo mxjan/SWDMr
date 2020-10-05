@@ -300,6 +300,10 @@ gg<-gg+geom_line()
 # Add expression points
 gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Arntl)
 gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Arntl")
+
+# Compute Sleep-wake driven value
+SWdv<-SWdrivenValue(model,fits,c(0,24))
+gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
 gg
 ```
 
@@ -390,6 +394,11 @@ gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
 gg<-gg+geom_line()
 gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Homer1)
 gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Homer1")
+
+# Compute Sleep-wake driven value
+SWdv<-SWdrivenValue(model,fits,c(0,24))
+gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
+
 gg
 ```
 
@@ -440,6 +449,11 @@ gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
 gg<-gg+geom_line()
 gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Acot11)
 gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Acot11")
+
+# Compute Sleep-wake driven value
+SWdv<-SWdrivenValue(model,fits,c(0,24))
+gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
+
 gg
 ```
 
@@ -488,6 +502,11 @@ gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
 gg<-gg+geom_line()
 gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Cyth3)
 gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3")
+
+# Compute Sleep-wake driven value
+SWdv<-SWdrivenValue(model,fits,c(0,24))
+gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
+
 gg
 ```
 
@@ -666,7 +685,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.47
+    ## Nelder-Mead        1 FALSE FALSE  0.48
 
 ## Visualize fit
 

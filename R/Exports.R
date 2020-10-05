@@ -20,6 +20,25 @@ initDDHOmodel<-function(object,VarExp, UseDampingRatio = F){
 }
 
 
+#' Sleep-wake driven value
+#'
+#' Function to compute the Sleep-Wake driven value. As variance from the force applied 
+#' by sleep & wake over the variance from other external forces
+#'
+#' @param object A SWDMr model
+#' @param params parameter fitted by optimx
+#' @param interval Time interval for the computation
+#' 
+#' @return numeric value
+#'
+#' @examples
+#' SWdrivenValue(model,fits,c(0,24))
+#'
+#'@export
+setGeneric("SWdrivenValue",function(object,params,interval)
+  standardGeneric("SWdrivenValue"))
+
+
 #' Create a SWDMr object
 #'
 #' Create a SWDMr object using a sleep-wake data.frame and a gene expression data.frame

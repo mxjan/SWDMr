@@ -577,6 +577,29 @@ setMethod("GetAllParams",signature="SWDMr_DDHO",function(object,params){
   
 })
 
+setMethod("SWdrivenValue",signature="SWDMr_DDHO",function(object,params,interval){
+  
+  params<-SWDMr:::GetAllParams(model,params)
+  
+  # Time interval given
+  idxInterval<- object@SWdist$Time >= (interval[1] - object@tol) & object@SWdist$Time <= (interval[2] + object@tol)
+  
+  # Get variance of the force applied by sleep & wake
+  coefS<-params[params$subparameter == "Sleep","value"]
+  coefW<-params[params$subparameter == "Wake","value"]
+  Fsw<-object@SWdist$Sleep[idxInterval]*coefS+object@SWdist$Wake[idxInterval]*coefW
+  # Get variance of the force applied by the circadian system
+  AmpSin<-params[params$subparameter == "AmpSin","value"]
+  PhiSin<-params[params$subparameter == "PhiSin","value"]  
+  PerSin<-params[params$subparameter == "PerSin","value"]
+  Fsin<-AmpSin*sin(2*pi/PerSin*object@SWdist$Time[idxInterval]+PhiSin)
+  
+  return(var(Fsw)/(var(Fsw)+var(Fsin)))
+  
+})
+
+
+
 setGeneric("ForceApplied", function(object,params) 
   standardGeneric("ForceApplied") )
 setMethod("ForceApplied",signature="SWDMr_DDHO",function(object,params){
