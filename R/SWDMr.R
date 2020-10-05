@@ -6,12 +6,13 @@ setClass(
     representation = representation(
         SWdist = "data.frame",
         Gexp = "data.frame",
-        verbose = "numeric"
+        verbose = "numeric",
+        tol = "numeric" # tolerance when looking for some intervals
     ),
     
     prototype=list(
         verbose = 1,
-        tol <- .Machine$double.eps ^ 0.5 
+        tol = .Machine$double.eps ^ 0.5 
     ),
     
     validity=SWDMrcheck
