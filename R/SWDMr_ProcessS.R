@@ -28,19 +28,34 @@ setClass(
     verbose = "numeric"
   ),
   
-  prototype=list(
-    initmod = "Free",
-    initpos = 0,
-
-    FittingValue = "RSS",
-    
-    verbose = 1
-  ),
-  
-  validity=SWDMr_ProcScheck
+  # prototype=list(
+  #   initmod = "Free",
+  #   initpos = 0,
+  # 
+  #   FittingValue = "RSS",
+  #   
+  #   verbose = 1
+  # ),
+  # 
+  # validity=SWDMr_ProcScheck
   
 )
 
+
+setMethod("initialize","SWDMr_ProcS",function(.Object,initmod = "Free",initpos = 0, 
+                                             FittingValue = "RSS", verbose=1,...){
+  
+  .Object <- callNextMethod(.Object, ...)
+  
+  .Object@initmod <- initmod
+  .Object@initpos <- initpos
+  
+  .Object@FittingValue <- FittingValue
+  
+  .Object@verbose <- verbose
+  
+  .Object
+})
 
 
 ############# Summaries ################
@@ -204,13 +219,10 @@ setMethod("SWDMrFit",signature="SWDMr_ProcS", function(object,params){
 
 setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingValue="RSS",detailed=F){
   
-  predv<-approxfun(fitted$time,fitted$y1)
-  predval<-predv(object@Gexp$Time)
+  idx<-na.omit(object@Match_Tgexp_Tswd)
   
-  idx<- ! is.na(predval) & ! is.na(object@Gexp[,object@VarExp])
-  
-  GeneExp<-object@Gexp[idx,object@VarExp]
-  predval<-predval[idx]
+  GeneExp<-object@Gexp[which(! is.na(object@Match_Tgexp_Tswd)),object@VarExp]
+  predval<-fitted$y1[idx]
   
   n <- length(GeneExp)
   

@@ -292,4 +292,6 @@ setGeneric("PctAbsForceApplied", function(object,params,pct=T)
   standardGeneric("PctAbsForceApplied") )
 setGeneric("AllForceApplied", function(object,params) 
   standardGeneric("AllForceApplied") )
+setGeneric("MatchPoints", function(object)
+  standardGeneric("MatchPoints") )
 

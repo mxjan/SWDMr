@@ -49,26 +49,32 @@ setClass(
     verbose = "numeric"
   ),
   
-  prototype=list(
-    initmod = "Free",
-    initpos = 0,
-    initspeed = 0,
-    
-    SinForce = F,
-    AmpSin = 0,
-    PhiSin = 0,
-    PerSin = 0,
-    
-    PenalizeUnstableFit = F,
-    
-    FittingValue = "RSS",
-    
-    verbose = 1
-  ),
-  
-  validity=SWDMr_DDHOcheck
-  
 )
+
+setMethod("initialize","SWDMr_DDHO",function(.Object,initmod = "Free",initpos = 0,initspeed = 0,
+                                             SinForce = F, AmpSin = 0,PhiSin = 0,PerSin = 0,
+                                             PenalizeUnstableFit = F, 
+                                             FittingValue = "RSS", verbose=1,...){
+  
+  .Object <- callNextMethod(.Object, ...)
+  
+  .Object@initmod <- initmod
+  .Object@initpos <- initpos
+  .Object@initpos <- initspeed
+  
+  .Object@SinForce <- SinForce
+  .Object@AmpSin <- AmpSin
+  .Object@PhiSin <- PhiSin  
+  .Object@PerSin <- PerSin  
+  
+  .Object@PenalizeUnstableFit <- PenalizeUnstableFit
+  
+  .Object@FittingValue <- FittingValue
+  
+  .Object@verbose <- verbose
+  
+  .Object
+})
 
 ######################################
 ############# METHODS ################
@@ -435,13 +441,10 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
 
 setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingValue="RSS",detailed=F){
   
-  predv<-approxfun(fitted$time,fitted$y1)
-  predval<-predv(object@Gexp$Time)
+  idx<-na.omit(object@Match_Tgexp_Tswd)
   
-  idx<- ! is.na(predval) & ! is.na(object@Gexp[,object@VarExp])
-  
-  GeneExp<-object@Gexp[idx,object@VarExp]
-  predval<-predval[idx]
+  GeneExp<-object@Gexp[which(! is.na(object@Match_Tgexp_Tswd)),object@VarExp]
+  predval<-fitted$y1[idx]
   
   n <- length(GeneExp)
   

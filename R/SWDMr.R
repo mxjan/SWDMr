@@ -6,18 +6,64 @@ setClass(
     representation = representation(
         SWdist = "data.frame",
         Gexp = "data.frame",
+        Match_Tgexp_Tswd = "numeric",
         verbose = "numeric",
         tol = "numeric" # tolerance when looking for some intervals
     ),
     
-    prototype=list(
-        verbose = 1,
-        tol = .Machine$double.eps ^ 0.5 
-    ),
+    # prototype=list(
+    #     verbose = 1,
+    #     tol = .Machine$double.eps ^ 0.5,
+    #     Match_Tgexp_Tswd = SWDMr:::MatchPoints
+    # ),
     
-    validity=SWDMrcheck
+    #validity=SWDMrcheck
     
 )
+
+
+setMethod("initialize","SWDMr",function(.Object,SWdist,Gexp,
+                                        verbose=1,tol= .Machine$double.eps ^ 0.5 ,...){
+    
+    .Object <- callNextMethod(.Object, ...)
+    
+    .Object@SWdist <- SWdist
+    .Object@Gexp <- Gexp
+    
+    .Object@verbose <- verbose
+    .Object@tol <- tol
+    
+    .Object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(.Object)
+    
+    .Object
+})
+
+setMethod("MatchPoints","SWDMr",function(object) {
+    
+    # Match point from time Gexp to time SWdf
+    MatchFun<-function(x){
+        ret<-which(abs(object@SWdist$Time-x) < object@tol)
+        if (any(ret)){
+            return(ret)
+        }else{
+            return(NA)
+        }
+    }
+    
+    idx<-sapply(object@Gexp$Time,MatchFun)
+    
+    if (any(is.na(idx))){
+        
+        msg<-"Not all points in Gexp were found in SWdist\n"
+        for (i in which(is.na(idx))){
+            msg<-c(msg,"- Point T",object@Gexp$Time[i]," not found\n")
+        }
+        warning(msg)
+    }
+    
+    return(idx)
+    
+})
 
 
 setMethod("summary", "SWDMr", function(object) {
@@ -58,7 +104,11 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
     disttmp$Time<- t1-rev(cumsum(rep(timestep,nrow(disttmp))))
     object@SWdist<-rbind(disttmp,object@SWdist)
     
+    # Redefined matching points
+    object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(object)
+    
     return(object)
+    
 })
 
 
