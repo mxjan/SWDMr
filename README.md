@@ -283,7 +283,7 @@ fits
     ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
     ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.38
+    ## nlminb     55    214    32        0 TRUE TRUE  0.37
 
 ## Visualize fit
 
@@ -448,6 +448,54 @@ gg
     ## Warning: Removed 9 rows containing missing values (geom_point).
 
 ![](README_files/figure-gfm/unnamed-chunk-23-1.jpeg)<!-- -->
+
+``` r
+model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
+```
+
+    ## Warning in SWDMr:::MatchPoints(.Object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
+MeanGeneExprInBaseline<-mean(RNAExpression$Cyth3[RNAExpression$Time<=48])
+model<-FixIntercept(model,MeanGeneExprInBaseline)
+model<-AddForce(model,"Wake")
+model<-AddForce(model,"Sleep")
+model<-AddSinF(model,FixPer = 24)
+model<-SetYinitMode(model,mode = "Intercept_0")
+model<-ReplicateDrivingForce(model,c(0,24.0),40)
+```
+
+    ## Warning in SWDMr:::MatchPoints(object): Not all points in Gexp were found in SWdist
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T216 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+    ## - Point T222 not found
+
+``` r
+objfun<-SWDMrGetEvalFun(model)
+params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
+fits<-optimx(params,fn = objfun,method=c("nlminb"))
+out<-SWDMrFit(model,fits)
+gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
+gg<-gg+geom_line()
+gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Cyth3)
+gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3")
+gg
+```
+
+    ## Warning: Removed 9600 row(s) containing missing values (geom_path).
+
+    ## Warning: Removed 9 rows containing missing values (geom_point).
+
+![](README_files/figure-gfm/unnamed-chunk-24-1.jpeg)<!-- -->
 
 # Fit a process-S dynamic on phenotype
 
@@ -638,7 +686,7 @@ gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_b
 gg
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-36-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.jpeg)<!-- -->
 
 ## Compute some statistics
 
@@ -680,7 +728,7 @@ plot(fitted,residuals);abline(h=mean(residuals))
 qqnorm(residuals);qqline(residuals)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-39-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-40-1.jpeg)<!-- -->
 
 ``` r
 sessionInfo()

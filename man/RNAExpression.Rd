@@ -14,7 +14,7 @@ A data.frame.
 data(RNAExpression)
 }
 \description{
-Data for 3 genes (Homer1, Arntl & Acot11) expression in the
+Data for 4 genes (Homer1, Arntl, Acot11 & Cyth3) expression in the
 mouse cortex, in a time-course experiment.
 }
 \details{

@@ -291,6 +291,27 @@ gg
 ```
 
 
+```{r}
+model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
+MeanGeneExprInBaseline<-mean(RNAExpression$Cyth3[RNAExpression$Time<=48])
+model<-FixIntercept(model,MeanGeneExprInBaseline)
+model<-AddForce(model,"Wake")
+model<-AddForce(model,"Sleep")
+model<-AddSinF(model,FixPer = 24)
+model<-SetYinitMode(model,mode = "Intercept_0")
+model<-ReplicateDrivingForce(model,c(0,24.0),40)
+objfun<-SWDMrGetEvalFun(model)
+params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
+fits<-optimx(params,fn = objfun,method=c("nlminb"))
+out<-SWDMrFit(model,fits)
+gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
+gg<-gg+geom_line()
+gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Cyth3)
+gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3")
+gg
+```
+
+
 # Fit a process-S dynamic on phenotype
 
 This is a simplified version of process-S like driven phenotypes, see [J.Yeung github](https://github.com/jakeyeung/SleepDepAnalysis)
