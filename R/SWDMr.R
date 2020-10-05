@@ -10,7 +10,8 @@ setClass(
     ),
     
     prototype=list(
-        verbose = 1
+        verbose = 1,
+        tol <- .Machine$double.eps ^ 0.5 
     ),
     
     validity=SWDMrcheck
@@ -48,7 +49,7 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
     t1<-object@SWdist[1,"Time"]
     t2<-object@SWdist[2,"Time"]
     timestep<-t2-t1
-    idxInterval<- object@SWdist$Time >= interval[1] & object@SWdist$Time <= interval[2]
+    idxInterval<- object@SWdist$Time >= (interval[1] - object@tol) & object@SWdist$Time <= (interval[2] + object@tol)
     nvals <- nrow(object@SWdist[idxInterval, ])
     if (round(nvals*timestep,5) %% 24 != 0){stop("The interval must be a multiple of 24h, here it is: ",nvals*timestep, "(modulo 24 is:",nvals*timestep %% 24,")")}
     
@@ -65,7 +66,7 @@ setGeneric("SDSimulation",  function(object,StartTime,Duration)
 setMethod("SDSimulation",signature="SWDMr",function(object,StartTime,Duration){
     
     timestep<-object@SWdist$Time[2]-object@SWdist$Time[1]
-    idxSimu<-which(object@SWdist$Time >= StartTime & object@SWdist$Time <= StartTime+Duration-timestep)
+    idxSimu<-which(object@SWdist$Time >= (StartTime-object@tol) & object@SWdist$Time <= (StartTime+object@tol)+Duration-timestep)
     
     # Keep only time points 
     newSWdf<-object@SWdist[seq(1,min(idxSimu)-1),]
