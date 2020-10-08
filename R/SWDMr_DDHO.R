@@ -439,12 +439,20 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
 
 
 
-setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingValue="RSS",detailed=F){
+setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingValue="RSS",detailed=F,match="exact"){
   
-  idx<-na.omit(object@Match_Tgexp_Tswd)
-  
-  GeneExp<-object@Gexp[which(! is.na(object@Match_Tgexp_Tswd)),object@VarExp]
-  predval<-fitted$y1[idx]
+  if (match == "exact"){
+    idx<-na.omit(object@Match_Tgexp_Tswd)
+    GeneExp<-object@Gexp[which(! is.na(object@Match_Tgexp_Tswd)),object@VarExp]
+    predval<-fitted$y1[idx]
+  }else if (match == "approx"){
+    predv<-approxfun(fitted$time,fitted$y1)
+    predval<-predv(object@Gexp$Time)
+    idx<- ! is.na(predval) & ! is.na(object@Gexp[,object@VarExp])
+    GeneExp<-object@Gexp[idx,object@VarExp]
+    predval<-predval[idx]
+  }
+
   
   n <- length(GeneExp)
   
@@ -516,7 +524,7 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
 })
 
 
-setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object){
+setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object,match="exact"){
   
   # Return an objective function
   objfun<-function(params){
@@ -525,7 +533,7 @@ setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object){
     out<-SWDMrFit(object,params)
     
     # Step 2. Get fitting value
-    stat<-SWDMrStats(object,out,FittingValue = object@FittingValue)
+    stat<-SWDMrStats(object,out,FittingValue = object@FittingValue,match=match)
     
     # Step 3. If Penalization is set to True, compute 
     if (object@PenalizeUnstableFit == T){

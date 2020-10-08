@@ -217,12 +217,19 @@ setMethod("SWDMrFit",signature="SWDMr_ProcS", function(object,params){
 
 
 
-setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingValue="RSS",detailed=F){
+setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingValue="RSS",detailed=F,match="exact"){
   
-  idx<-na.omit(object@Match_Tgexp_Tswd)
-  
-  GeneExp<-object@Gexp[which(! is.na(object@Match_Tgexp_Tswd)),object@VarExp]
-  predval<-fitted$y1[idx]
+  if (match == "exact"){
+    idx<-na.omit(object@Match_Tgexp_Tswd)
+    GeneExp<-object@Gexp[which(! is.na(object@Match_Tgexp_Tswd)),object@VarExp]
+    predval<-fitted$y1[idx]
+  }else if (match == "approx"){
+    predv<-approxfun(fitted$time,fitted$y1)
+    predval<-predv(object@Gexp$Time)
+    idx<- ! is.na(predval) & ! is.na(object@Gexp[,object@VarExp])
+    GeneExp<-object@Gexp[idx,object@VarExp]
+    predval<-predval[idx]
+  }
   
   n <- length(GeneExp)
   
@@ -294,7 +301,7 @@ setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingVa
 })
 
 
-setMethod("SWDMrGetEvalFun",signature="SWDMr_ProcS", function(object){
+setMethod("SWDMrGetEvalFun",signature="SWDMr_ProcS", function(object,match = "exact"){
   
   # Return an objective function
   objfun<-function(params){
@@ -303,7 +310,7 @@ setMethod("SWDMrGetEvalFun",signature="SWDMr_ProcS", function(object){
     out<-SWDMrFit(object,params)
     
     # Step 2. Get fitting value
-    stat<-SWDMrStats(object,out,FittingValue = object@FittingValue)
+    stat<-SWDMrStats(object,out,FittingValue = object@FittingValue,match=match)
     
     
     return(stat$val)

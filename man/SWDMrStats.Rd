@@ -5,7 +5,7 @@
 \alias{SWDMrStats}
 \title{Return statistics of the fitting}
 \usage{
-SWDMrStats(object, fitted, FittingValue = "RSS", detailed = F)
+SWDMrStats(object, fitted, FittingValue = "RSS", detailed = F, match = "exact")
 }
 \arguments{
 \item{object}{An SWDMr model object}
@@ -15,6 +15,8 @@ SWDMrStats(object, fitted, FittingValue = "RSS", detailed = F)
 \item{FittingValue}{What value to return for the fitting (RSS or NLL or LL)}
 
 \item{detailed}{If set to True, return all value (RSS,NLL,LL,BIC), N, nparams}
+
+\item{match}{character "exact" or "approx"}
 }
 \description{
 Return statistics of the fitting

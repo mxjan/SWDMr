@@ -5,10 +5,12 @@
 \alias{SWDMrGetEvalFun}
 \title{Return function to evaluate}
 \usage{
-SWDMrGetEvalFun(object)
+SWDMrGetEvalFun(object, match = "exact")
 }
 \arguments{
 \item{object}{An SWDMr model object}
+
+\item{match}{character "exact" or "approx"}
 }
 \description{
 Return function to evaluate

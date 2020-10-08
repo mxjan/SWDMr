@@ -201,22 +201,24 @@ setGeneric("SWDMrFit", function(object,params)
 #' @param fitted fitted value
 #' @param FittingValue What value to return for the fitting (RSS or NLL or LL)
 #' @param detailed If set to True, return all value (RSS,NLL,LL,BIC), N, nparams
+#' @param match character "exact" or "approx" 
 #' @export
 #' @docType methods
 #' @examples 
 #' fitted<-SWDMrFit(model,params)
 #' stats<-SWDMrStats(model,fitted)
-setGeneric("SWDMrStats", function(object,fitted,FittingValue="RSS",detailed=F)
+setGeneric("SWDMrStats", function(object,fitted,FittingValue="RSS",detailed=F,match="exact")
   standardGeneric("SWDMrStats") )
 
 #' Return function to evaluate
 #' @param object An SWDMr model object
+#' @param match character "exact" or "approx" 
 #' @export
 #' @docType methods
 #' @examples 
 #' objfun<-SWDMrGetEvalFun(model)
 #' optimx(objfunc,params)
-setGeneric("SWDMrGetEvalFun", function(object)
+setGeneric("SWDMrGetEvalFun", function(object,match="exact")
   standardGeneric("SWDMrGetEvalFun") )
 
 
