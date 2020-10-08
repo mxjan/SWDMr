@@ -6,12 +6,14 @@
 \alias{SWDMr-package}
 \title{Create a SWDMr object}
 \usage{
-SWDMr(SWdist, Gexp, verbose = 1)
+SWDMr(SWdist, Gexp, verbose = 1, match = T)
 }
 \arguments{
 \item{SWdist}{sleep-wake dataframe, must contain the column: Wake, Sleep and Time}
 
 \item{Gexp}{Gene expression dataframe which must contain genes as column and a Time column corresponding to the sleep - wake dataframe}
+
+\item{match}{Match data points between Gexp and SWdist (if no match use match = "approx" when using SWDMrStats())}
 }
 \value{
 SWDMr object

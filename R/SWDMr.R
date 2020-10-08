@@ -6,6 +6,7 @@ setClass(
     representation = representation(
         SWdist = "data.frame",
         Gexp = "data.frame",
+        Match = "logical",
         Match_Tgexp_Tswd = "numeric",
         verbose = "numeric",
         tol = "numeric" # tolerance when looking for some intervals
@@ -23,7 +24,7 @@ setClass(
 
 
 setMethod("initialize","SWDMr",function(.Object,SWdist,Gexp,
-                                        verbose=1,tol= .Machine$double.eps ^ 0.5 ,...){
+                                        verbose=1,tol= .Machine$double.eps ^ 0.5, match=T ,...){
     
     .Object <- callNextMethod(.Object, ...)
     
@@ -33,7 +34,14 @@ setMethod("initialize","SWDMr",function(.Object,SWdist,Gexp,
     .Object@verbose <- verbose
     .Object@tol <- tol
     
-    .Object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(.Object)
+    .Object@Match <- match
+    
+    if (.Object@Match == T){
+        .Object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(.Object)
+    }else{
+        .Object@Match_Tgexp_Tswd<-c(0)
+    }
+    
     
     .Object
 })
@@ -105,7 +113,9 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
     object@SWdist<-rbind(disttmp,object@SWdist)
     
     # Redefined matching points
-    object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(object)
+    if (.Object@Match == T){
+        object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(object)
+    }
     
     return(object)
     

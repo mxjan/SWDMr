@@ -45,6 +45,7 @@ setGeneric("SWdrivenValue",function(object,params,interval)
 #'
 #' @param SWdist sleep-wake dataframe, must contain the column: Wake, Sleep and Time
 #' @param Gexp Gene expression dataframe which must contain genes as column and a Time column corresponding to the sleep - wake dataframe
+#' @param match Match data points between Gexp and SWdist (if no match use match = "approx" when using SWDMrStats())
 #'
 #' @return SWDMr object
 #'
@@ -52,8 +53,8 @@ setGeneric("SWdrivenValue",function(object,params,interval)
 #' swdmr <- SWDMr(SWdist=SWdf, Gexp=Gexpdf)
 #'
 #'@export
-SWDMr <- function(SWdist,Gexp,verbose=1){
-  new (Class="SWDMr",SWdist=SWdist,Gexp=Gexp,verbose=verbose)
+SWDMr <- function(SWdist,Gexp,verbose=1,match=T){
+  new (Class="SWDMr",SWdist=SWdist,Gexp=Gexp,verbose=verbose,match=match)
 }
 
 #' Unstable Fit penalization
