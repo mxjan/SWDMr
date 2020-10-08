@@ -14,7 +14,7 @@
 #'@export
 initDDHOmodel<-function(object,VarExp, UseDampingRatio = F){
   new(Class = "SWDMr_DDHO", SWdist = object@SWdist, 
-      Gexp = object@Gexp[c(VarExp,"Time")],
+      Gexp = object@Gexp[c(VarExp,"Time")], match=object@Match,
       VarExp = VarExp,
       UseDampingRatio = UseDampingRatio)
 }
@@ -242,7 +242,7 @@ setGeneric("SWDMrGetEvalFun", function(object,match="exact")
 #'@export
 initProcessSmodel<-function(object,VarExp){
   new(Class = "SWDMr_ProcS", SWdist = object@SWdist, 
-      Gexp = object@Gexp[c(VarExp,"Time")],
+      Gexp = object@Gexp[c(VarExp,"Time")], match=object@Match,
       VarExp = VarExp)
 }
 

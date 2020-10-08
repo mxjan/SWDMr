@@ -55,6 +55,7 @@ setMethod("initialize","SWDMr_ProcS",function(.Object,initmod = "Free",initpos =
   .Object@verbose <- verbose
   
   .Object
+  
 })
 
 

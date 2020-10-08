@@ -113,7 +113,7 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
     object@SWdist<-rbind(disttmp,object@SWdist)
     
     # Redefined matching points
-    if (.Object@Match == T){
+    if (object@Match == T){
         object@Match_Tgexp_Tswd<-SWDMr:::MatchPoints(object)
     }
     
