@@ -452,6 +452,12 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
     GeneExp<-object@Gexp[idx,object@VarExp]
     predval<-predval[idx]
   }
+  
+  ISNAGexp<-is.na(GeneExp)
+  if (any(ISNAGexp)){
+    GeneExp<-GeneExp[! ISNAGexp]
+    predval<-predval[! ISNAGexp]
+  }
 
   
   n <- length(GeneExp)
@@ -587,7 +593,7 @@ setMethod("GetAllParams",signature="SWDMr_DDHO",function(object,params){
 
 setMethod("SWdrivenValue",signature="SWDMr_DDHO",function(object,params,interval){
   
-  params<-SWDMr:::GetAllParams(model,params)
+  params<-SWDMr:::GetAllParams(object,params)
   
   # Time interval given
   idxInterval<- object@SWdist$Time >= (interval[1] - object@tol) & object@SWdist$Time <= (interval[2] + object@tol)

@@ -61,14 +61,12 @@ setMethod("MatchPoints","SWDMr",function(object) {
     idx<-sapply(object@Gexp$Time,MatchFun)
     
     if (any(is.na(idx))){
-        
         msg<-"Not all points in Gexp were found in SWdist\n"
         for (i in which(is.na(idx))){
             msg<-c(msg,"- Point T",object@Gexp$Time[i]," not found\n")
         }
         warning(msg)
     }
-    
     return(idx)
     
 })

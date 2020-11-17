@@ -1,7 +1,7 @@
 Examples
 ================
 Maxime Jan
-05 octobre, 2020
+06 octobre, 2020
 
   - [Sleep-Wake Driven Models, an R package
     \[SWDMr\]](#sleep-wake-driven-models-an-r-package-swdmr)
@@ -44,6 +44,8 @@ library(SWDMr) # Package for model construction, objective function building
 library(optimx) # Package for parameter optimization
 library(ggplot2) # Package for visualization
 ```
+
+    ## Warning: package 'ggplot2' was built under R version 4.0.2
 
 # Format vigilant state
 
@@ -270,7 +272,7 @@ fits
     ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
     ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.38
+    ## nlminb     55    214    32        0 TRUE TRUE  0.29
 
 ## Visualize fit
 
@@ -597,7 +599,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.47
+    ## Nelder-Mead        1 FALSE FALSE  0.39
 
 ## Visualize fit
 
@@ -665,7 +667,7 @@ qqnorm(residuals);qqline(residuals)
 sessionInfo()
 ```
 
-    ## R version 4.0.1 (2020-06-06)
+    ## R version 4.0.0 (2020-04-24)
     ## Platform: x86_64-w64-mingw32/x64 (64-bit)
     ## Running under: Windows 10 x64 (build 18363)
     ## 
@@ -680,18 +682,18 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] ggplot2_3.3.1   optimx_2020-4.2 SWDMr_1.2      
+    ## [1] ggplot2_3.3.2   optimx_2020-4.2 SWDMr_1.2      
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] Rcpp_1.0.4.6        knitr_1.28          magrittr_1.5       
-    ##  [4] tidyselect_1.1.0    munsell_0.5.0       colorspace_1.4-1   
-    ##  [7] R6_2.4.1            rlang_0.4.6         dplyr_1.0.0        
-    ## [10] stringr_1.4.0       tools_4.0.1         grid_4.0.1         
-    ## [13] gtable_0.3.0        xfun_0.14           withr_2.2.0        
-    ## [16] htmltools_0.5.0     ellipsis_0.3.1      yaml_2.2.1         
-    ## [19] digest_0.6.25       tibble_3.0.1        lifecycle_0.2.0    
-    ## [22] crayon_1.3.4        numDeriv_2016.8-1.1 farver_2.0.3       
-    ## [25] purrr_0.3.4         vctrs_0.3.1         glue_1.4.1         
-    ## [28] evaluate_0.14       rmarkdown_2.4       labeling_0.3       
-    ## [31] stringi_1.4.6       compiler_4.0.1      pillar_1.4.4       
-    ## [34] generics_0.0.2      scales_1.1.1        pkgconfig_2.0.3
+    ##  [4] tidyselect_1.0.0    munsell_0.5.0       colorspace_1.4-1   
+    ##  [7] R6_2.4.1            rlang_0.4.5         dplyr_0.8.5        
+    ## [10] stringr_1.4.0       tools_4.0.0         grid_4.0.0         
+    ## [13] gtable_0.3.0        xfun_0.13           withr_2.2.0        
+    ## [16] htmltools_0.5.0     ellipsis_0.3.0      assertthat_0.2.1   
+    ## [19] yaml_2.2.1          digest_0.6.25       tibble_3.0.1       
+    ## [22] lifecycle_0.2.0     crayon_1.3.4        numDeriv_2016.8-1.1
+    ## [25] farver_2.0.3        purrr_0.3.4         vctrs_0.2.4        
+    ## [28] glue_1.4.0          evaluate_0.14       rmarkdown_2.1      
+    ## [31] labeling_0.3        stringi_1.4.6       compiler_4.0.0     
+    ## [34] pillar_1.4.3        scales_1.1.0        pkgconfig_2.0.3

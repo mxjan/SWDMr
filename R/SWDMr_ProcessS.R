@@ -232,6 +232,12 @@ setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingVa
     predval<-predval[idx]
   }
   
+  ISNAGexp<-is.na(GeneExp)
+  if (any(ISNAGexp)){
+    GeneExp<-GeneExp[! ISNAGexp]
+    predval<-predval[! ISNAGexp]
+  }
+  
   n <- length(GeneExp)
   
   # Return only RSS | NLL | LL 
