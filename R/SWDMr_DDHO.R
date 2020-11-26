@@ -538,22 +538,30 @@ setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object,match="exact
     # Step 1. Fit function given params
     out<-SWDMrFit(object,params)
     
-    # Step 2. Get fitting value
-    stat<-SWDMrStats(object,out,FittingValue = object@FittingValue,match=match)
-    
-    # Step 3. If Penalization is set to True, compute 
-    if (object@PenalizeUnstableFit == T){
-      retval <- AddUnstableFitPenalization(object = object,
-                                           fitted = out,
-                                           FittingValue = object@FittingValue,
-                                           val = stat$val,
-                                           var = stat$var)
+    # Is fitting good ?
+    if (any(is.na(out$y1))){
+      
+      return(Inf)
+      
     }else{
-      retval<-stat$val
+      
+      # Step 2. Get fitting value
+      stat<-SWDMrStats(object,out,FittingValue = object@FittingValue,match=match)
+      
+      # Step 3. If Penalization is set to True, compute 
+      if (object@PenalizeUnstableFit == T){
+        retval <- AddUnstableFitPenalization(object = object,
+                                             fitted = out,
+                                             FittingValue = object@FittingValue,
+                                             val = stat$val,
+                                             var = stat$var)
+      }else{
+        retval<-stat$val
+      }
+      
+      return(retval)
+      
     }
-    
-    return(retval)
-    
   }
   
   return(objfun)
