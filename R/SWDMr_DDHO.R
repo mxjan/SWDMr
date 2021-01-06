@@ -343,7 +343,7 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
     gamma<-exp(allparams$value[gamma_idx])
   }else{
     dampratio_idx<-which(allparams$subparameter == "dampratio")
-    gamma <- allparams$value[dampratio_idx] / (2*allparams$value[omega_idx])
+    gamma <- allparams$value[dampratio_idx] * (2*allparams$value[omega_idx])
   }
 
   # Initial position

@@ -103,7 +103,7 @@ setMethod("ReplicateDrivingForce",signature="SWDMr", function(object,interval,Nr
     t2<-object@SWdist[2,"Time"]
     timestep<-t2-t1
     idxInterval<- object@SWdist$Time >= (interval[1] - object@tol) & object@SWdist$Time <= (interval[2] + object@tol)
-    nvals <- nrow(object@SWdist[idxInterval, ])
+    nvals <- nrow(object@SWdist[idxInterval, ,drop=F])
     if (round(nvals*timestep,5) %% 24 != 0){stop("The interval must be a multiple of 24h, here it is: ",nvals*timestep, "(modulo 24 is:",nvals*timestep %% 24,")")}
     
     disttmp<-do.call("rbind", replicate(Nrep, object@SWdist[idxInterval, ] , simplify = FALSE))
