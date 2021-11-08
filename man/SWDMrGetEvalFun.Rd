@@ -5,12 +5,14 @@
 \alias{SWDMrGetEvalFun}
 \title{Return function to evaluate}
 \usage{
-SWDMrGetEvalFun(object, match = "exact")
+SWDMrGetEvalFun(object, match = "exact", method = "rk4")
 }
 \arguments{
 \item{object}{An SWDMr model object}
 
 \item{match}{character "exact" or "approx"}
+
+\item{method}{method to solve ODE, approximation by "rk4" or true "Solve"}
 }
 \description{
 Return function to evaluate

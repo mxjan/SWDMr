@@ -5,12 +5,14 @@
 \alias{SWDMrFit}
 \title{Fit data given model}
 \usage{
-SWDMrFit(object, params)
+SWDMrFit(object, params, method = "rk4")
 }
 \arguments{
 \item{object}{An SWDMr model object}
 
 \item{params}{a named vector with required free parameter value}
+
+\item{method}{can be rk4 or Solve, rk4 is 10x faster. Solve will also return sinusoidal, force and transient response}
 }
 \description{
 Fit data given model

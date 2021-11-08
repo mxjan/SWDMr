@@ -11,3 +11,8 @@ SDDHO_SinF_RungeKutta <- function(y, time, force, gamma, k, AmpSin, PhiSin, PerS
     .Call('_SWDMr_SDDHO_SinF_RungeKutta', PACKAGE = 'SWDMr', y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
 }
 
+#' @export
+Solve_SDDHO_longdouble <- function(y, time, force, gamma, k, AmpSin, PhiSin, PerSin) {
+    .Call('_SWDMr_Solve_SDDHO_longdouble', PACKAGE = 'SWDMr', y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
+}
+

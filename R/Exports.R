@@ -189,11 +189,12 @@ setGeneric("AddForce", function(object,ForceName,value=numeric(0))
 #' Fit data given model
 #' @param object An SWDMr model object
 #' @param params a named vector with required free parameter value
+#' @param method can be rk4 or Solve, rk4 is 10x faster. Solve will also return sinusoidal, force and transient response
 #' @export
 #' @docType methods
 #' @examples 
 #' fitted<-SWDMrFit(model,params)
-setGeneric("SWDMrFit", function(object,params)
+setGeneric("SWDMrFit", function(object,params,method="rk4")
   standardGeneric("SWDMrFit") )
 
 
@@ -214,12 +215,13 @@ setGeneric("SWDMrStats", function(object,fitted,FittingValue="RSS",detailed=F,ma
 #' Return function to evaluate
 #' @param object An SWDMr model object
 #' @param match character "exact" or "approx" 
+#' @param method method to solve ODE, approximation by "rk4" or true "Solve"
 #' @export
 #' @docType methods
 #' @examples 
 #' objfun<-SWDMrGetEvalFun(model)
 #' optimx(objfunc,params)
-setGeneric("SWDMrGetEvalFun", function(object,match="exact")
+setGeneric("SWDMrGetEvalFun", function(object,match="exact",method="rk4")
   standardGeneric("SWDMrGetEvalFun") )
 
 

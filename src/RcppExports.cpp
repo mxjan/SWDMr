@@ -41,10 +41,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Solve_SDDHO_longdouble
+List Solve_SDDHO_longdouble(NumericVector y, NumericVector time, NumericVector force, long double gamma, long double k, long double AmpSin, long double PhiSin, long double PerSin);
+RcppExport SEXP _SWDMr_Solve_SDDHO_longdouble(SEXP ySEXP, SEXP timeSEXP, SEXP forceSEXP, SEXP gammaSEXP, SEXP kSEXP, SEXP AmpSinSEXP, SEXP PhiSinSEXP, SEXP PerSinSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type force(forceSEXP);
+    Rcpp::traits::input_parameter< long double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< long double >::type k(kSEXP);
+    Rcpp::traits::input_parameter< long double >::type AmpSin(AmpSinSEXP);
+    Rcpp::traits::input_parameter< long double >::type PhiSin(PhiSinSEXP);
+    Rcpp::traits::input_parameter< long double >::type PerSin(PerSinSEXP);
+    rcpp_result_gen = Rcpp::wrap(Solve_SDDHO_longdouble(y, time, force, gamma, k, AmpSin, PhiSin, PerSin));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SWDMr_CptSprocess", (DL_FUNC) &_SWDMr_CptSprocess, 8},
     {"_SWDMr_SDDHO_SinF_RungeKutta", (DL_FUNC) &_SWDMr_SDDHO_SinF_RungeKutta, 8},
+    {"_SWDMr_Solve_SDDHO_longdouble", (DL_FUNC) &_SWDMr_Solve_SDDHO_longdouble, 8},
     {NULL, NULL, 0}
 };
 

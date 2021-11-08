@@ -74,8 +74,8 @@ SWdf_AddLD<-function(SWdf){
   Modulo<-SWdf$Time %% 24
   Lightv<-rep(0,nrow(SWdf))
   Darkv<-rep(0,nrow(SWdf))
-  Lightv[Modulo<=12]<- 1
-  Darkv[Modulo>12]<- 1
+  Lightv[Modulo<=12 & Modulo != 0]<- 1
+  Darkv[Modulo>12 | Modulo == 0]<- 1
   SWdf$Light<-Lightv
   SWdf$Dark<-Darkv
   return(SWdf)

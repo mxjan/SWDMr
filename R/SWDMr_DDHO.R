@@ -117,7 +117,7 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   if (length(slot(object,"AddEffects")) > 0){
     for (AddEffect in names(slot(object,"AddEffects"))){
       if (length(object@AddEffects[[AddEffect]]) == 0){
-        freeparams<-rbind(freeparams,c("AddEffects",AddEffectAddEffect,NA))
+        freeparams<-rbind(freeparams,c("AddEffects",AddEffect,NA))
       }else{
         fixedparams<-rbind(fixedparams,c("AddEffects",AddEffect,object@AddEffects[[AddEffect]]))
       }
@@ -326,7 +326,9 @@ setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=N
 })
 
 # function to return the fitted values given parameters
-setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
+setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params,method="rk4"){
+  
+  if (! method %in% c("rk4","Solve")){stop("Method must be \"rk4\" or \"Solve\"")}
   
   # Control parameters given
   allparams<-GetAllParams(object,params)
@@ -372,9 +374,13 @@ setMethod("SWDMrFit",signature="SWDMr_DDHO", function(object,params){
     PerSin<-24
   }
   
-  # Fit# Solve ODE, see src/sddho_sinforce_RK4.cpp
-  out<-SWDMr:::SDDHO_SinF_RungeKutta(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin) 
-  
+  if (method=="rk4"){
+    # Solve ODE by runge kutta 4th order approximation, see src/sddho_sinforce_RK4.cpp
+    out<-SWDMr:::SDDHO_SinF_RungeKutta(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin) 
+  }else if (method == "Solve"){
+    # See src/ddho_solve.cpp, 10 times slower
+    out<-SWDMr:::Solve_SDDHO_longdouble(y=y.init,time = time,force = force,gamma = gamma, k=k, AmpSin = AmpSin, PhiSin = PhiSin, PerSin = PerSin)
+  }
   # Add intercept to data
   out$y1 <- out$y1 + intercept
   
@@ -530,13 +536,13 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
 })
 
 
-setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object,match="exact"){
+setMethod("SWDMrGetEvalFun",signature="SWDMr_DDHO", function(object,match="exact",method="rk4"){
   
   # Return an objective function
   objfun<-function(params){
     
     # Step 1. Fit function given params
-    out<-SWDMrFit(object,params)
+    out<-SWDMrFit(object,params,method)
     
     # Is fitting good ?
     if (any(is.na(out$y1))){
