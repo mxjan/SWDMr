@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // CptSprocess
 NumericVector CptSprocess(NumericVector Sleep, NumericVector Wake, NumericVector time, double U, double L, double t_w, double t_s, double init);
 RcppExport SEXP _SWDMr_CptSprocess(SEXP SleepSEXP, SEXP WakeSEXP, SEXP timeSEXP, SEXP USEXP, SEXP LSEXP, SEXP t_wSEXP, SEXP t_sSEXP, SEXP initSEXP) {

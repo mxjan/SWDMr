@@ -505,7 +505,7 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
     residualsV<-(GeneExp-predval)
     # Residuals sum of square
     RSS<-sum(residualsV^2)
-    # biased estimator of sigma^2
+    # Maximum likelihood of sigma^2
     var<-RSS/n
     # Negative Log Likelihood
     NLL<- (n/2)*(log(2*pi)+log(var)+1)
