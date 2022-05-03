@@ -273,7 +273,7 @@ fits
     ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
     ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.41
+    ## nlminb     55    214    32        0 TRUE TRUE  0.42
 
 ## Visualize fit
 
@@ -349,8 +349,8 @@ stats<-SWDMrStats(model,out,detailed = T)$stats
 stats
 ```
 
-    ##   Variable       RSS       NLL      BIC BIC_flat  BayesFactor       AIC  n k
-    ## 1    Arntl 0.3719629 -60.94021 -97.7283 13.06533 1.144275e+24 -109.8804 56 6
+    ##   Variable       RSS       NLL       BIC BIC_flat  BayesFactor       AIC  n k
+    ## 1    Arntl 0.3719629 -60.94021 -93.70295 17.09068 1.144275e+24 -107.8804 56 7
     ##   ErrorVariance KendalTau
     ## 1   0.006642194 0.7598035
 
@@ -403,7 +403,7 @@ SWDMrStats(model,out,detailed = T)$stats
 ```
 
     ##   Variable      RSS       NLL      BIC BIC_flat  BayesFactor      AIC  n k
-    ## 1   Homer1 2.748343 -4.941335 14.26944 93.52109 1.619116e+17 2.117329 56 6
+    ## 1   Homer1 2.748343 -4.941335 18.29479 97.54644 1.619116e+17 4.117329 56 7
     ##   ErrorVariance KendalTau
     ## 1    0.04907756 0.7397206
 
@@ -467,8 +467,8 @@ gg
 SWDMrStats(model,out,detailed = T)$stats
 ```
 
-    ##   Variable       RSS       NLL       BIC  BIC_flat BayesFactor       AIC  n k
-    ## 1   Acot11 0.5012828 -52.58566 -81.01922 -49.95585     5563197 -93.17133 56 6
+    ##   Variable       RSS       NLL       BIC BIC_flat BayesFactor       AIC  n k
+    ## 1   Acot11 0.5012828 -52.58566 -76.99387 -45.9305     5563197 -91.17133 56 7
     ##   ErrorVariance KendalTau
     ## 1   0.008951479  0.572363
 
@@ -530,7 +530,7 @@ SWDMrStats(model,out,detailed = T)$stats
 ```
 
     ##   Variable      RSS       NLL       BIC  BIC_flat BayesFactor       AIC  n k
-    ## 1    Cyth3 0.162987 -84.04366 -143.9352 -101.8929  1347009900 -156.0873 56 6
+    ## 1    Cyth3 0.162987 -84.04366 -139.9099 -97.86756  1347009900 -154.0873 56 7
     ##   ErrorVariance KendalTau
     ## 1   0.002910482 0.5319461
 
@@ -701,7 +701,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE   0.5
+    ## Nelder-Mead        1 FALSE FALSE  0.48
 
 ## Visualize fit
 
@@ -747,7 +747,7 @@ stats
 ```
 
     ##   Variable      RSS       NLL      BIC BIC_flat  BayesFactor       AIC  n k
-    ## 1   Homer1 2.670078 -5.750276 4.600854 93.52109 2.036032e+19 -3.500553 56 4
+    ## 1   Homer1 2.670078 -5.750276 8.626206 97.54644 2.036032e+19 -1.500553 56 5
     ##   ErrorVariance KendalTau
     ## 1    0.04767996 0.7397206
 
@@ -782,7 +782,7 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] patchwork_1.1.1 ggplot2_3.3.5   optimx_2020-4.2 SWDMr_1.3      
+    ## [1] patchwork_1.1.1 ggplot2_3.3.5   optimx_2020-4.2 SWDMr_1.3.2    
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] Rcpp_1.0.7          highr_0.9           pillar_1.6.4       
