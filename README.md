@@ -1,7 +1,7 @@
 Examples
 ================
 Maxime Jan
-09 août, 2021
+03 mai, 2022
 
 -   [Sleep-Wake Driven Models, an R package
     \[SWDMr\]](#sleep-wake-driven-models-an-r-package-swdmr)
@@ -27,10 +27,9 @@ Maxime Jan
 *An R package to fit models for sleep-wake driven phenotypes*
 
 -   [x] Read and format vigilant state data
--   [ ] Read *smo* file format
 -   [x] Fit a Process-S dynamic model
--   [ ] Fit a Process-C dynamic model
 -   [x] Fit an driven damped harmonic oscillator model
+-   [x] Add solution Anne Skeldon
 
 Statistical methods are inspired by Jake Yeung method for model
 selection. See [J.Yeung
@@ -43,6 +42,11 @@ library(SWDMr) # Package for model construction, objective function building
 # External package
 library(optimx) # Package for parameter optimization
 library(ggplot2) # Package for visualization
+```
+
+    ## Warning: le package 'ggplot2' a été compilé avec la version R 4.1.2
+
+``` r
 library(patchwork)
 ```
 
@@ -269,7 +273,7 @@ fits
     ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
     ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.37
+    ## nlminb     55    214    32        0 TRUE TRUE  0.41
 
 ## Visualize fit
 
@@ -778,19 +782,20 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] patchwork_1.1.1 ggplot2_3.3.3   optimx_2020-4.2 SWDMr_1.3      
+    ## [1] patchwork_1.1.1 ggplot2_3.3.5   optimx_2020-4.2 SWDMr_1.3      
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] Rcpp_1.0.6          highr_0.9           pillar_1.6.1       
+    ##  [1] Rcpp_1.0.7          highr_0.9           pillar_1.6.4       
     ##  [4] compiler_4.1.0      tools_4.1.0         digest_0.6.27      
-    ##  [7] evaluate_0.14       lifecycle_1.0.0     tibble_3.1.2       
+    ##  [7] evaluate_0.14       lifecycle_1.0.1     tibble_3.1.2       
     ## [10] gtable_0.3.0        pkgconfig_2.0.3     rlang_0.4.11       
-    ## [13] yaml_2.2.1          xfun_0.23           withr_2.4.2        
-    ## [16] stringr_1.4.0       dplyr_1.0.6         knitr_1.33         
-    ## [19] generics_0.1.0      vctrs_0.3.8         grid_4.1.0         
-    ## [22] tidyselect_1.1.1    glue_1.4.2          R6_2.5.0           
-    ## [25] fansi_0.5.0         rmarkdown_2.8       farver_2.1.0       
-    ## [28] purrr_0.3.4         magrittr_2.0.1      scales_1.1.1       
-    ## [31] ellipsis_0.3.2      htmltools_0.5.1.1   colorspace_2.0-1   
-    ## [34] numDeriv_2016.8-1.1 labeling_0.4.2      utf8_1.2.1         
-    ## [37] stringi_1.6.2       munsell_0.5.0       crayon_1.4.1
+    ## [13] DBI_1.1.1           yaml_2.2.1          xfun_0.30          
+    ## [16] fastmap_1.1.0       withr_2.4.2         stringr_1.4.0      
+    ## [19] dplyr_1.0.6         knitr_1.37          generics_0.1.0     
+    ## [22] vctrs_0.3.8         grid_4.1.0          tidyselect_1.1.1   
+    ## [25] glue_1.4.2          R6_2.5.1            fansi_0.5.0        
+    ## [28] rmarkdown_2.12      farver_2.1.0        purrr_0.3.4        
+    ## [31] magrittr_2.0.1      scales_1.1.1        ellipsis_0.3.2     
+    ## [34] htmltools_0.5.2     assertthat_0.2.1    colorspace_2.0-1   
+    ## [37] numDeriv_2016.8-1.1 labeling_0.4.2      utf8_1.2.1         
+    ## [40] stringi_1.6.2       munsell_0.5.0       crayon_1.4.2
