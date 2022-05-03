@@ -16,10 +16,9 @@ output:
 *An R package to fit models for sleep-wake driven phenotypes* 
 
 - [x] Read and format vigilant state data
-- [ ] Read *smo* file format
 - [x] Fit a Process-S dynamic model
-- [ ] Fit a Process-C dynamic model
 - [x] Fit an driven damped harmonic oscillator model
+- [x] Add solution Anne Skeldon
 
 
 Statistical methods are inspired by Jake Yeung method for model selection. See [J.Yeung github](https://github.com/jakeyeung/SleepDepAnalysis) and [PNAS publication](https://doi.org/10.1073/pnas.1910590116)

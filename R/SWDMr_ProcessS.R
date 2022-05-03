@@ -273,7 +273,7 @@ setMethod("SWDMrStats",signature="SWDMr_ProcS", function(object,fitted,FittingVa
     
     # Number of parameters
     # R function BIC use k + 1, variance estimator is added
-    k <- nrow(GetFreeFixedParams(object)$FreeParams)
+    k <- nrow(GetFreeFixedParams(object)$FreeParams) + 1
     # residuals
     residualsV<-(GeneExp-predval)
     # Residuals sum of square
