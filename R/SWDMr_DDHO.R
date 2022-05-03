@@ -520,7 +520,7 @@ setMethod("SWDMrStats",signature="SWDMr_DDHO", function(object,fitted,FittingVal
     RSS_flat<-sum(resid(lm_flat)^2)
     var_flat<-RSS_flat/n
     NLL_flat<- (n/2)*(log(2*pi)+log(var_flat)+1)
-    BIC_flat <- -2*(-NLL_flat)+(1)*log(n)
+    BIC_flat <- -2*(-NLL_flat)+(2)*log(n)
     
     # Bayes Factor
     BF_DDHOvFlat<-exp((BIC_flat-BIC)/2)
