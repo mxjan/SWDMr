@@ -51,7 +51,7 @@ Compute the amount of wake,nrem and rem sleep per 6 minutes bin (0.1h)
 
 ```{r}
 # Read the matrix and transform it into a data.frame for time spent in each state per "concattimesec" bin [in sec]
-SWdf<-Read_SW(SleepWakeData,concattimesec = 360) # 300 = 5min, 180 = 3 min, 360 = 6min
+SWdf<-Read_SW(SleepWakeData,concattimesec = 360,ResultBy ="proportion") # 300 = 5min, 180 = 3 min, 360 = 6min
 
 # We can add day and night cycle
 SWdf<-SWdf_AddLD(SWdf)
@@ -156,6 +156,11 @@ We replicate baseline sleep-wake distribution to allow the oscillator to reach a
 
 ```{r,warning=F}
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+```
+
+
+```{r}
+model<-SetParametersModel(model)
 ```
 
 
@@ -289,6 +294,7 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+model<-SetParametersModel(model)
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -344,6 +350,7 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+model<-SetParametersModel(model)
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -385,59 +392,6 @@ gg_resp <- gg_resp + scale_color_manual(values=c("Circadian response" = rgb(224/
 gg_resp
 ```
 
-
-
-
-```{r,warning=F}
-model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
-MeanGeneExprInBaseline<-mean(RNAExpression$Cyth3[RNAExpression$Time<=48])
-model<-FixIntercept(model,MeanGeneExprInBaseline)
-model<-AddForce(model,"Wake")
-model<-AddForce(model,"Sleep")
-model<-AddSinF(model,FixPer = 24)
-model<-SetYinitMode(model,mode = "Intercept_0")
-model<-ReplicateDrivingForce(model,c(0,24.0),40)
-objfun<-SWDMrGetEvalFun(model)
-params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
-fits<-optimx(params,fn = objfun,method=c("nlminb"))
-out<-SWDMrFit(model,fits)
-gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
-gg<-gg+geom_line()
-gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Cyth3)
-gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3")
-
-# Compute Sleep-wake driven value
-SWdv<-SWdrivenValue(model,fits,c(0,24))
-gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
-
-gg
-
-
-# Stats
-SWDMrStats(model,out,detailed = T)$stats
-```
-
-
-```{r}
-out_response<-SWDMrFit(model,fits,method="Solve")
-totalreponse<-out_response$circ_sol + out_response$trans_sol + out_response$SW_response + model@intercept
-data_response=cbind.data.frame(time=out_response$time[-1],
-                      response=c(out_response$circ_sol,fits$AmpSin * sin(2*pi/24*out_response$time[-1]+fits$PhiSin),
-                                 out_response$trans_sol + out_response$SW_response,
-                                 model@SWdist$Sleep*fits$Sleep + model@SWdist$Wake*fits$Wake),
-                      value=c(rep("Circadian response",length(out_response$time[-1])),
-                              rep("Circadian force",length(out_response$time[-1])),
-                              rep("Sleep-Wake response",length(out_response$time[-1])),
-                              rep("Sleep-Wake force",length(out_response$time[-1]))))
-
-gg_resp<-ggplot(aes(time,y=response,color=value),data=data_response)+geom_line(size=1)
-gg_resp<-gg_resp+scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3 - Responses")
-gg_resp <- gg_resp + scale_color_manual(values=c("Circadian response" = rgb(224/255,160/255, 0/255),
-                                                 "Sleep-Wake response" = rgb(20 /255,61/255, 89/255),
-                                                 "Circadian force" =rgb(224/255,160/255, 0/255,.5),
-                                                 "Sleep-Wake force" = rgb(20 /255,61/255, 89/255,.5)))
-gg_resp
-```
 
 # Fit a process-S dynamic on phenotype
 

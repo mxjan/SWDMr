@@ -1,35 +1,41 @@
 Examples
 ================
 Maxime Jan
-03 mai, 2022
+15 avril, 2024
 
--   [Sleep-Wake Driven Models, an R package
-    \[SWDMr\]](#sleep-wake-driven-models-an-r-package-swdmr)
--   [Format vigilant state](#format-vigilant-state)
--   [Fit a Driven Damped harmonic oscillator
-    model](#fit-a-driven-damped-harmonic-oscillator-model)
-    -   [Data](#data)
-    -   [Create model](#create-model)
-    -   [Optimization](#optimization)
-    -   [Visualize fit](#visualize-fit)
-    -   [Compute some statistics](#compute-some-statistics)
-    -   [Other dynamics](#other-dynamics)
--   [Fit a process-S dynamic on
-    phenotype](#fit-a-process-s-dynamic-on-phenotype)
-    -   [Data:](#data-1)
-    -   [Create model](#create-model-1)
-    -   [Optimization](#optimization-1)
-    -   [Visualize fit](#visualize-fit-1)
-    -   [Compute some statistics](#compute-some-statistics-1)
+- <a href="#sleep-wake-driven-models-an-r-package-swdmr"
+  id="toc-sleep-wake-driven-models-an-r-package-swdmr">Sleep-Wake Driven
+  Models, an R package [SWDMr]</a>
+- <a href="#format-vigilant-state" id="toc-format-vigilant-state">Format
+  vigilant state</a>
+- <a href="#fit-a-driven-damped-harmonic-oscillator-model"
+  id="toc-fit-a-driven-damped-harmonic-oscillator-model">Fit a Driven
+  Damped harmonic oscillator model</a>
+  - <a href="#data" id="toc-data">Data</a>
+  - <a href="#create-model" id="toc-create-model">Create model</a>
+  - <a href="#optimization" id="toc-optimization">Optimization</a>
+  - <a href="#visualize-fit" id="toc-visualize-fit">Visualize fit</a>
+  - <a href="#compute-some-statistics"
+    id="toc-compute-some-statistics">Compute some statistics</a>
+  - <a href="#other-dynamics" id="toc-other-dynamics">Other dynamics</a>
+- <a href="#fit-a-process-s-dynamic-on-phenotype"
+  id="toc-fit-a-process-s-dynamic-on-phenotype">Fit a process-S dynamic on
+  phenotype</a>
+  - <a href="#data-1" id="toc-data-1">Data:</a>
+  - <a href="#create-model-1" id="toc-create-model-1">Create model</a>
+  - <a href="#optimization-1" id="toc-optimization-1">Optimization</a>
+  - <a href="#visualize-fit-1" id="toc-visualize-fit-1">Visualize fit</a>
+  - <a href="#compute-some-statistics-1"
+    id="toc-compute-some-statistics-1">Compute some statistics</a>
 
 # Sleep-Wake Driven Models, an R package \[SWDMr\]
 
 *An R package to fit models for sleep-wake driven phenotypes*
 
--   [x] Read and format vigilant state data
--   [x] Fit a Process-S dynamic model
--   [x] Fit an driven damped harmonic oscillator model
--   [x] Add solution Anne Skeldon
+- [x] Read and format vigilant state data
+- [x] Fit a Process-S dynamic model
+- [x] Fit an driven damped harmonic oscillator model
+- [x] Add solution Anne Skeldon
 
 Statistical methods are inspired by Jake Yeung method for model
 selection. See [J.Yeung
@@ -38,15 +44,53 @@ publication](https://doi.org/10.1073/pnas.1910590116)
 
 ``` r
 library(SWDMr) # Package for model construction, objective function building
-
-# External package
-library(optimx) # Package for parameter optimization
-library(ggplot2) # Package for visualization
 ```
 
-    ## Warning: le package 'ggplot2' a été compilé avec la version R 4.1.2
+    ## Le chargement a nécessité le package : Rfast
+
+    ## Warning: le package 'Rfast' a été compilé avec la version R 4.2.3
+
+    ## Le chargement a nécessité le package : Rcpp
+
+    ## Le chargement a nécessité le package : RcppZiggurat
+
+    ## Warning: le package 'RcppZiggurat' a été compilé avec la version R 4.2.3
+
+    ## Le chargement a nécessité le package : RcppParallel
+
+    ## 
+    ## Attachement du package : 'RcppParallel'
+
+    ## L'objet suivant est masqué depuis 'package:Rcpp':
+    ## 
+    ##     LdFlags
+
+    ## 
+    ## Rfast: 2.1.0
+
+    ##  ___ __ __ __ __    __ __ __ __ __ _             _               __ __ __ __ __     __ __ __ __ __ __   
+    ## |  __ __ __ __  |  |  __ __ __ __ _/            / \             |  __ __ __ __ /   /__ __ _   _ __ __\  
+    ## | |           | |  | |                         / _ \            | |                        / /          
+    ## | |           | |  | |                        / / \ \           | |                       / /          
+    ## | |           | |  | |                       / /   \ \          | |                      / /          
+    ## | |__ __ __ __| |  | |__ __ __ __           / /     \ \         | |__ __ __ __ _        / /__/\          
+    ## |    __ __ __ __|  |  __ __ __ __|         / /__ _ __\ \        |_ __ __ __ _   |      / ___  /           
+    ## |   \              | |                    / _ _ _ _ _ _ \                     | |      \/  / /       
+    ## | |\ \             | |                   / /           \ \                    | |         / /          
+    ## | | \ \            | |                  / /             \ \                   | |        / /          
+    ## | |  \ \           | |                 / /               \ \                  | |       / /          
+    ## | |   \ \__ __ _   | |                / /                 \ \     _ __ __ __ _| |      / /          
+    ## |_|    \__ __ __\  |_|               /_/                   \_\   /_ __ __ __ ___|      \/             team
 
 ``` r
+# External package
+library(optimx) # Package for parameter optimization
+```
+
+    ## Warning: le package 'optimx' a été compilé avec la version R 4.2.3
+
+``` r
+library(ggplot2) # Package for visualization
 library(patchwork)
 ```
 
@@ -55,9 +99,9 @@ library(patchwork)
 Get vigilant state of mice. Each row is a 4 seconds epoch containing the
 vigilant state of the mouse
 
--   Wake = w \| 1
--   NREM sleep = n \| 2
--   REM sleep = r \| 3
+- Wake = w \| 1
+- NREM sleep = n \| 2
+- REM sleep = r \| 3
 
 ``` r
 data(SleepWakeData)
@@ -76,7 +120,7 @@ Compute the amount of wake,nrem and rem sleep per 6 minutes bin (0.1h)
 
 ``` r
 # Read the matrix and transform it into a data.frame for time spent in each state per "concattimesec" bin [in sec]
-SWdf<-Read_SW(SleepWakeData,concattimesec = 360) # 300 = 5min, 180 = 3 min, 360 = 6min
+SWdf<-Read_SW(SleepWakeData,concattimesec = 360,ResultBy ="proportion") # 300 = 5min, 180 = 3 min, 360 = 6min
 
 # We can add day and night cycle
 SWdf<-SWdf_AddLD(SWdf)
@@ -91,18 +135,27 @@ SWdf<-SWdf_AddSD(SWdf,c(48,54))
 head(SWdf)
 ```
 
-    ##         NREM         REM       Wake      Sleep LenW LenS Day Time Light Dark SD
-    ## 1 0.03273148 0.001296296 0.06597222 0.03402778 59.5 30.5   1  0.1     1    0  0
-    ## 2 0.03648148 0.002824074 0.06069444 0.03930556 55.0 35.0   1  0.2     1    0  0
-    ## 3 0.04069444 0.004351852 0.05495370 0.04504630 49.5 40.5   1  0.3     1    0  0
-    ## 4 0.04986111 0.002824074 0.04731481 0.05268519 42.5 47.5   1  0.4     1    0  0
-    ## 5 0.06240741 0.003611111 0.03398148 0.06601852 30.5 59.5   1  0.5     1    0  0
-    ## 6 0.06763889 0.009907407 0.02245370 0.07754630 20.5 69.5   1  0.6     1    0  0
+    ##        NREM        REM      Wake     Sleep Day Time Light Dark SD
+    ## 1 0.3273148 0.01296296 0.6597222 0.3402778   1  0.1     1    0  0
+    ## 2 0.3648148 0.02824074 0.6069444 0.3930556   1  0.2     1    0  0
+    ## 3 0.4069444 0.04351852 0.5495370 0.4504630   1  0.3     1    0  0
+    ## 4 0.4986111 0.02824074 0.4731481 0.5268519   1  0.4     1    0  0
+    ## 5 0.6240741 0.03611111 0.3398148 0.6601852   1  0.5     1    0  0
+    ## 6 0.6763889 0.09907407 0.2245370 0.7754630   1  0.6     1    0  0
 
 Sleep amount in the experiment
 
 ``` r
 gg<-ggplot(aes(x=Time,y=Sleep),data=SWdf)+geom_line(color="darkblue",size=1)
+```
+
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 gg<-gg+scale_x_continuous(breaks=seq(0,96,by=12))
 gg<-gg+ylab("Sleep amount [h]")+xlab("Time [h]")+ theme_bw()
 gg
@@ -224,6 +277,10 @@ reach a stable oscillation
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
 ```
 
+``` r
+model<-SetParametersModel(model)
+```
+
 This is our model:
 
 ``` r
@@ -271,9 +328,9 @@ fits
 ```
 
     ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
-    ## nlminb 0.2173783 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
+    ## nlminb 0.2173784 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.42
+    ## nlminb     55    214    32        0 TRUE TRUE  0.06
 
 ## Visualize fit
 
@@ -297,7 +354,7 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 gg
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.jpeg)<!-- --> Let’s see
+![](README_files/figure-gfm/unnamed-chunk-19-1.jpeg)<!-- --> Let’s see
 the sinusoidal response, sleep-wake response and transient response
 
 ``` r
@@ -322,9 +379,9 @@ gg_resp <- gg_resp + scale_color_manual(values=c("Circadian response" = rgb(224/
 gg_resp
 ```
 
-    ## Warning: Removed 38396 row(s) containing missing values (geom_path).
+    ## Warning: Removed 38396 rows containing missing values (`geom_line()`).
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.jpeg)<!-- -->
 
 ## Compute some statistics
 
@@ -334,16 +391,16 @@ fitted<-SWDMrStats(model,out,detailed = T)$fitted
 stats<-SWDMrStats(model,out,detailed = T)$stats
 ```
 
--   Residual Sum of Square: RSS
--   Negative Log Likelihood: NLL
--   Bayesian Information Criterion: BIC
--   BIC of a linear model with an intercept only: BIC\_flat
--   Bayes Factor between our model and a flat model: BayesFactor
--   Akaike Information Criterion: AIC
--   Number of samples in model: n
--   Number of free parameters: k
--   Variance of resiudals: ErrorVariance
--   Kendall’s tau between data points and fit: KendalTau
+- Residual Sum of Square: RSS
+- Negative Log Likelihood: NLL
+- Bayesian Information Criterion: BIC
+- BIC of a linear model with an intercept only: BIC_flat
+- Bayes Factor between our model and a flat model: BayesFactor
+- Akaike Information Criterion: AIC
+- Number of samples in model: n
+- Number of free parameters: k
+- Variance of resiudals: ErrorVariance
+- Kendall’s tau between data points and fit: KendalTau
 
 ``` r
 stats
@@ -364,7 +421,7 @@ plot(fitted,residuals);abline(h=mean(residuals))
 qqnorm(residuals);qqline(residuals)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-22-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-23-1.jpeg)<!-- -->
 
 ## Other dynamics
 
@@ -379,6 +436,7 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+model<-SetParametersModel(model)
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -395,7 +453,7 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 gg
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.jpeg)<!-- -->
 
 ``` r
 # Stats
@@ -429,9 +487,9 @@ gg_resp <- gg_resp + scale_color_manual(values=c("Circadian response" = rgb(224/
 gg_resp
 ```
 
-    ## Warning: Removed 38396 row(s) containing missing values (geom_path).
+    ## Warning: Removed 38396 rows containing missing values (`geom_line()`).
 
-![](README_files/figure-gfm/unnamed-chunk-24-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-25-1.jpeg)<!-- -->
 
 Acot11
 
@@ -444,6 +502,7 @@ model<-AddForce(model,"Sleep")
 model<-AddSinF(model,FixPer = 24)
 model<-SetYinitMode(model,mode = "Intercept_0")
 model<-ReplicateDrivingForce(model,c(0,24.0),40)
+model<-SetParametersModel(model)
 objfun<-SWDMrGetEvalFun(model)
 params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
 fits<-optimx(params,fn = objfun,method=c("nlminb"))
@@ -460,7 +519,7 @@ gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2
 gg
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-25-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-26-1.jpeg)<!-- -->
 
 ``` r
 # Stats
@@ -470,7 +529,7 @@ SWDMrStats(model,out,detailed = T)$stats
     ##   Variable       RSS       NLL       BIC BIC_flat BayesFactor       AIC  n k
     ## 1   Acot11 0.5012828 -52.58566 -76.99387 -45.9305     5563197 -91.17133 56 7
     ##   ErrorVariance KendalTau
-    ## 1   0.008951479  0.572363
+    ## 1   0.008951479 0.5665658
 
 ``` r
 out_response<-SWDMrFit(model,fits,method="Solve")
@@ -493,71 +552,9 @@ gg_resp <- gg_resp + scale_color_manual(values=c("Circadian response" = rgb(224/
 gg_resp
 ```
 
-    ## Warning: Removed 38396 row(s) containing missing values (geom_path).
-
-![](README_files/figure-gfm/unnamed-chunk-26-1.jpeg)<!-- -->
-
-``` r
-model<-initDDHOmodel(swdmr,VarExp = "Cyth3")
-MeanGeneExprInBaseline<-mean(RNAExpression$Cyth3[RNAExpression$Time<=48])
-model<-FixIntercept(model,MeanGeneExprInBaseline)
-model<-AddForce(model,"Wake")
-model<-AddForce(model,"Sleep")
-model<-AddSinF(model,FixPer = 24)
-model<-SetYinitMode(model,mode = "Intercept_0")
-model<-ReplicateDrivingForce(model,c(0,24.0),40)
-objfun<-SWDMrGetEvalFun(model)
-params<-c(omega=2*pi/24,loggamma=-1,Wake=0,Sleep=0,AmpSin=0,PhiSin=pi)
-fits<-optimx(params,fn = objfun,method=c("nlminb"))
-out<-SWDMrFit(model,fits)
-gg<-ggplot(aes(x=time,y=fit),data=cbind.data.frame(time=out$time,fit=out$y1))
-gg<-gg+geom_line()
-gg <- gg + annotate("point",x=RNAExpression$Time,y=RNAExpression$Cyth3)
-gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3")
-
-# Compute Sleep-wake driven value
-SWdv<-SWdrivenValue(model,fits,c(0,24))
-gg<-gg+annotate("text",  x=Inf, y = Inf, label = paste("SW driven:",round(SWdv,2)), vjust=1, hjust=1)
-
-gg
-```
+    ## Warning: Removed 38396 rows containing missing values (`geom_line()`).
 
 ![](README_files/figure-gfm/unnamed-chunk-27-1.jpeg)<!-- -->
-
-``` r
-# Stats
-SWDMrStats(model,out,detailed = T)$stats
-```
-
-    ##   Variable      RSS       NLL       BIC  BIC_flat BayesFactor       AIC  n k
-    ## 1    Cyth3 0.162987 -84.04366 -139.9099 -97.86756  1347009900 -154.0873 56 7
-    ##   ErrorVariance KendalTau
-    ## 1   0.002910482 0.5319461
-
-``` r
-out_response<-SWDMrFit(model,fits,method="Solve")
-totalreponse<-out_response$circ_sol + out_response$trans_sol + out_response$SW_response + model@intercept
-data_response=cbind.data.frame(time=out_response$time[-1],
-                      response=c(out_response$circ_sol,fits$AmpSin * sin(2*pi/24*out_response$time[-1]+fits$PhiSin),
-                                 out_response$trans_sol + out_response$SW_response,
-                                 model@SWdist$Sleep*fits$Sleep + model@SWdist$Wake*fits$Wake),
-                      value=c(rep("Circadian response",length(out_response$time[-1])),
-                              rep("Circadian force",length(out_response$time[-1])),
-                              rep("Sleep-Wake response",length(out_response$time[-1])),
-                              rep("Sleep-Wake force",length(out_response$time[-1]))))
-
-gg_resp<-ggplot(aes(time,y=response,color=value),data=data_response)+geom_line(size=1)
-gg_resp<-gg_resp+scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_bw() + ggtitle("Cyth3 - Responses")
-gg_resp <- gg_resp + scale_color_manual(values=c("Circadian response" = rgb(224/255,160/255, 0/255),
-                                                 "Sleep-Wake response" = rgb(20 /255,61/255, 89/255),
-                                                 "Circadian force" =rgb(224/255,160/255, 0/255,.5),
-                                                 "Sleep-Wake force" = rgb(20 /255,61/255, 89/255,.5)))
-gg_resp
-```
-
-    ## Warning: Removed 38396 row(s) containing missing values (geom_path).
-
-![](README_files/figure-gfm/unnamed-chunk-28-1.jpeg)<!-- -->
 
 # Fit a process-S dynamic on phenotype
 
@@ -701,7 +698,7 @@ fitsS
     ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
     ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE  0.48
+    ## Nelder-Mead        1 FALSE FALSE   0.1
 
 ## Visualize fit
 
@@ -721,7 +718,7 @@ gg<-gg +scale_x_continuous(breaks=seq(-24,96,by=12),limits = c(-24,96))+ theme_b
 gg
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-41-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-40-1.jpeg)<!-- -->
 
 ## Compute some statistics
 
@@ -731,16 +728,16 @@ fitted<-SWDMrStats(modelS,outS,detailed = T)$fitted
 stats<-SWDMrStats(modelS,outS,detailed = T)$stats
 ```
 
--   Residual Sum of Square: RSS
--   Negative Log Likelihood: NLL
--   Bayesian Information Criterion: BIC
--   BIC of a linear model with an intercept only: BIC\_flat
--   Bayes Factor between our model and a flat model: BayesFactor
--   Akaike Information Criterion: AIC
--   Number of samples in model: n
--   Number of free parameters: k
--   Variance of resiudals: ErrorVariance
--   Kendall’s tau between data points and fit: KendalTau
+- Residual Sum of Square: RSS
+- Negative Log Likelihood: NLL
+- Bayesian Information Criterion: BIC
+- BIC of a linear model with an intercept only: BIC_flat
+- Bayes Factor between our model and a flat model: BayesFactor
+- Akaike Information Criterion: AIC
+- Number of samples in model: n
+- Number of free parameters: k
+- Variance of resiudals: ErrorVariance
+- Kendall’s tau between data points and fit: KendalTau
 
 ``` r
 stats
@@ -761,41 +758,42 @@ plot(fitted,residuals);abline(h=mean(residuals))
 qqnorm(residuals);qqline(residuals)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-44-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-43-1.jpeg)<!-- -->
 
 ``` r
 sessionInfo()
 ```
 
-    ## R version 4.1.0 (2021-05-18)
+    ## R version 4.2.2 (2022-10-31 ucrt)
     ## Platform: x86_64-w64-mingw32/x64 (64-bit)
-    ## Running under: Windows 10 x64 (build 19043)
+    ## Running under: Windows 10 x64 (build 22631)
     ## 
     ## Matrix products: default
     ## 
     ## locale:
-    ## [1] LC_COLLATE=French_Switzerland.1252  LC_CTYPE=French_Switzerland.1252   
-    ## [3] LC_MONETARY=French_Switzerland.1252 LC_NUMERIC=C                       
-    ## [5] LC_TIME=French_Switzerland.1252    
+    ## [1] LC_COLLATE=French_Switzerland.utf8  LC_CTYPE=French_Switzerland.utf8   
+    ## [3] LC_MONETARY=French_Switzerland.utf8 LC_NUMERIC=C                       
+    ## [5] LC_TIME=French_Switzerland.utf8    
     ## 
     ## attached base packages:
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] patchwork_1.1.1 ggplot2_3.3.5   optimx_2020-4.2 SWDMr_1.3.2    
+    ## [1] patchwork_1.1.2    ggplot2_3.4.1      optimx_2023-10.21  SWDMr_1.4         
+    ## [5] Rfast_2.1.0        RcppParallel_5.1.5 RcppZiggurat_0.1.6 Rcpp_1.0.9        
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] Rcpp_1.0.7          highr_0.9           pillar_1.6.4       
-    ##  [4] compiler_4.1.0      tools_4.1.0         digest_0.6.27      
-    ##  [7] evaluate_0.14       lifecycle_1.0.1     tibble_3.1.2       
-    ## [10] gtable_0.3.0        pkgconfig_2.0.3     rlang_0.4.11       
-    ## [13] DBI_1.1.1           yaml_2.2.1          xfun_0.30          
-    ## [16] fastmap_1.1.0       withr_2.4.2         stringr_1.4.0      
-    ## [19] dplyr_1.0.6         knitr_1.37          generics_0.1.0     
-    ## [22] vctrs_0.3.8         grid_4.1.0          tidyselect_1.1.1   
-    ## [25] glue_1.4.2          R6_2.5.1            fansi_0.5.0        
-    ## [28] rmarkdown_2.12      farver_2.1.0        purrr_0.3.4        
-    ## [31] magrittr_2.0.1      scales_1.1.1        ellipsis_0.3.2     
-    ## [34] htmltools_0.5.2     assertthat_0.2.1    colorspace_2.0-1   
-    ## [37] numDeriv_2016.8-1.1 labeling_0.4.2      utf8_1.2.1         
-    ## [40] stringi_1.6.2       munsell_0.5.0       crayon_1.4.2
+    ##  [1] pracma_2.4.2        highr_0.9           compiler_4.2.2     
+    ##  [4] pillar_1.9.0        nloptr_2.0.3        tools_4.2.2        
+    ##  [7] digest_0.6.30       evaluate_0.18       lifecycle_1.0.3    
+    ## [10] tibble_3.2.1        gtable_0.3.1        pkgconfig_2.0.3    
+    ## [13] rlang_1.1.1         cli_3.6.2           rstudioapi_0.14    
+    ## [16] yaml_2.3.6          parallel_4.2.2      xfun_0.34          
+    ## [19] fastmap_1.1.0       withr_2.5.0         dplyr_1.1.2        
+    ## [22] stringr_1.5.0       knitr_1.41          generics_0.1.3     
+    ## [25] vctrs_0.6.3         tidyselect_1.2.0    grid_4.2.2         
+    ## [28] glue_1.6.2          R6_2.5.1            fansi_1.0.4        
+    ## [31] rmarkdown_2.18      farver_2.1.1        magrittr_2.0.3     
+    ## [34] scales_1.2.1        htmltools_0.5.3     colorspace_2.1-0   
+    ## [37] numDeriv_2016.8-1.1 labeling_0.4.2      utf8_1.2.3         
+    ## [40] stringi_1.7.8       munsell_0.5.0       crayon_1.5.2
