@@ -44,45 +44,7 @@ publication](https://doi.org/10.1073/pnas.1910590116)
 
 ``` r
 library(SWDMr) # Package for model construction, objective function building
-```
 
-    ## Le chargement a nécessité le package : Rfast
-
-    ## Warning: le package 'Rfast' a été compilé avec la version R 4.2.3
-
-    ## Le chargement a nécessité le package : Rcpp
-
-    ## Le chargement a nécessité le package : RcppZiggurat
-
-    ## Warning: le package 'RcppZiggurat' a été compilé avec la version R 4.2.3
-
-    ## Le chargement a nécessité le package : RcppParallel
-
-    ## 
-    ## Attachement du package : 'RcppParallel'
-
-    ## L'objet suivant est masqué depuis 'package:Rcpp':
-    ## 
-    ##     LdFlags
-
-    ## 
-    ## Rfast: 2.1.0
-
-    ##  ___ __ __ __ __    __ __ __ __ __ _             _               __ __ __ __ __     __ __ __ __ __ __   
-    ## |  __ __ __ __  |  |  __ __ __ __ _/            / \             |  __ __ __ __ /   /__ __ _   _ __ __\  
-    ## | |           | |  | |                         / _ \            | |                        / /          
-    ## | |           | |  | |                        / / \ \           | |                       / /          
-    ## | |           | |  | |                       / /   \ \          | |                      / /          
-    ## | |__ __ __ __| |  | |__ __ __ __           / /     \ \         | |__ __ __ __ _        / /__/\          
-    ## |    __ __ __ __|  |  __ __ __ __|         / /__ _ __\ \        |_ __ __ __ _   |      / ___  /           
-    ## |   \              | |                    / _ _ _ _ _ _ \                     | |      \/  / /       
-    ## | |\ \             | |                   / /           \ \                    | |         / /          
-    ## | | \ \            | |                  / /             \ \                   | |        / /          
-    ## | |  \ \           | |                 / /               \ \                  | |       / /          
-    ## | |   \ \__ __ _   | |                / /                 \ \     _ __ __ __ _| |      / /          
-    ## |_|    \__ __ __\  |_|               /_/                   \_\   /_ __ __ __ ___|      \/             team
-
-``` r
 # External package
 library(optimx) # Package for parameter optimization
 ```
@@ -184,13 +146,13 @@ data(SWdf)
 head(SWdf)
 ```
 
-    ##         NREM         REM       Wake      Sleep LenW LenS Day Time Light Dark SD
-    ## 1 0.03273148 0.001296296 0.06597222 0.03402778 59.5 30.5   1  0.1     1    0  0
-    ## 2 0.03648148 0.002824074 0.06069444 0.03930556 55.0 35.0   1  0.2     1    0  0
-    ## 3 0.04069444 0.004351852 0.05495370 0.04504630 49.5 40.5   1  0.3     1    0  0
-    ## 4 0.04986111 0.002824074 0.04731481 0.05268519 42.5 47.5   1  0.4     1    0  0
-    ## 5 0.06240741 0.003611111 0.03398148 0.06601852 30.5 59.5   1  0.5     1    0  0
-    ## 6 0.06763889 0.009907407 0.02245370 0.07754630 20.5 69.5   1  0.6     1    0  0
+    ##        NREM        REM      Wake     Sleep Day Time Light Dark SD
+    ## 1 0.3273148 0.01296296 0.6597222 0.3402778   1  0.1     1    0  0
+    ## 2 0.3648148 0.02824074 0.6069444 0.3930556   1  0.2     1    0  0
+    ## 3 0.4069444 0.04351852 0.5495370 0.4504630   1  0.3     1    0  0
+    ## 4 0.4986111 0.02824074 0.4731481 0.5268519   1  0.4     1    0  0
+    ## 5 0.6240741 0.03611111 0.3398148 0.6601852   1  0.5     1    0  0
+    ## 6 0.6763889 0.09907407 0.2245370 0.7754630   1  0.6     1    0  0
 
 We then load phenotypes containing also time of sampling corresponding
 with the sleep-wake data.frame
@@ -230,7 +192,7 @@ swdmr
 
     ## This is a SWDMr object
     ## This object contains:  4 Genes Over 62 Time points
-    ## Your force data frame contain 1200 values with the following possible forces:NREM;REM;Wake;Sleep;LenW;LenS;Day;Time;Light;Dark;SD
+    ## Your force data frame contain 1200 values with the following possible forces:NREM;REM;Wake;Sleep;Day;Time;Light;Dark;SD
 
 Simulation goes up to T96 but some points in RNA expression data.frame
 goes up to T222
@@ -327,10 +289,10 @@ fits<-optimx(params,fn = objfun,method=c("nlminb"))
 fits
 ```
 
-    ##            omega  loggamma      Wake      Sleep      AmpSin  PhiSin     value
-    ## nlminb 0.2173784 -2.181641 0.1155323 -0.2281949 0.006037812 3.73187 0.3719629
+    ##            omega  loggamma       Wake      Sleep      AmpSin   PhiSin     value
+    ## nlminb 0.2173783 -2.181641 0.01155324 -0.0228195 0.006037809 3.731869 0.3719629
     ##        fevals gevals niter convcode kkt1 kkt2 xtime
-    ## nlminb     55    214    32        0 TRUE TRUE  0.06
+    ## nlminb     59    266    39        0 TRUE TRUE  0.12
 
 ## Visualize fit
 
@@ -571,13 +533,13 @@ data(SWdf)
 head(SWdf)
 ```
 
-    ##         NREM         REM       Wake      Sleep LenW LenS Day Time Light Dark SD
-    ## 1 0.03273148 0.001296296 0.06597222 0.03402778 59.5 30.5   1  0.1     1    0  0
-    ## 2 0.03648148 0.002824074 0.06069444 0.03930556 55.0 35.0   1  0.2     1    0  0
-    ## 3 0.04069444 0.004351852 0.05495370 0.04504630 49.5 40.5   1  0.3     1    0  0
-    ## 4 0.04986111 0.002824074 0.04731481 0.05268519 42.5 47.5   1  0.4     1    0  0
-    ## 5 0.06240741 0.003611111 0.03398148 0.06601852 30.5 59.5   1  0.5     1    0  0
-    ## 6 0.06763889 0.009907407 0.02245370 0.07754630 20.5 69.5   1  0.6     1    0  0
+    ##        NREM        REM      Wake     Sleep Day Time Light Dark SD
+    ## 1 0.3273148 0.01296296 0.6597222 0.3402778   1  0.1     1    0  0
+    ## 2 0.3648148 0.02824074 0.6069444 0.3930556   1  0.2     1    0  0
+    ## 3 0.4069444 0.04351852 0.5495370 0.4504630   1  0.3     1    0  0
+    ## 4 0.4986111 0.02824074 0.4731481 0.5268519   1  0.4     1    0  0
+    ## 5 0.6240741 0.03611111 0.3398148 0.6601852   1  0.5     1    0  0
+    ## 6 0.6763889 0.09907407 0.2245370 0.7754630   1  0.6     1    0  0
 
 We then load phenotypes containing also time of sampling corresponding
 with the sleep-wake data.frame
@@ -608,7 +570,7 @@ swdmr
 
     ## This is a SWDMr object
     ## This object contains:  4 Genes Over 62 Time points
-    ## Your force data frame contain 1200 values with the following possible forces:NREM;REM;Wake;Sleep;LenW;LenS;Day;Time;Light;Dark;SD
+    ## Your force data frame contain 1200 values with the following possible forces:NREM;REM;Wake;Sleep;Day;Time;Light;Dark;SD
 
 We then initiate a model for a process-S dynamics
 
@@ -695,10 +657,10 @@ fitsS<-optimx(paramsS,fn = objfun,method=c("Nelder-Mead"))
 fitsS
 ```
 
-    ##             AsympWake AsympSleep  TauWake TauSleep    value fevals gevals niter
-    ## Nelder-Mead  9.333525  -18.17969 3.518485 72.72382 2.670078    501     NA    NA
+    ##             AsympWake AsympSleep TauWake TauSleep    value fevals gevals niter
+    ## Nelder-Mead  9.420144   1.948633 43.2601 192.5619 2.753997    501     NA    NA
     ##             convcode  kkt1  kkt2 xtime
-    ## Nelder-Mead        1 FALSE FALSE   0.1
+    ## Nelder-Mead        1 FALSE FALSE  0.17
 
 ## Visualize fit
 
@@ -744,9 +706,9 @@ stats
 ```
 
     ##   Variable      RSS       NLL      BIC BIC_flat  BayesFactor       AIC  n k
-    ## 1   Homer1 2.670078 -5.750276 8.626206 97.54644 2.036032e+19 -1.500553 56 5
+    ## 1   Homer1 2.753997 -4.883802 10.35915 97.54644 8.560111e+18 0.2323964 56 5
     ##   ErrorVariance KendalTau
-    ## 1    0.04767996 0.7397206
+    ## 1    0.04917851 0.7343652
 
 *Here n=56 while dataset contains 62 points. Because fit was performed
 up to Time96 while last points reach Time 216 and 222. If these points
@@ -779,19 +741,18 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] patchwork_1.1.2    ggplot2_3.4.1      optimx_2023-10.21  SWDMr_1.4         
-    ## [5] Rfast_2.1.0        RcppParallel_5.1.5 RcppZiggurat_0.1.6 Rcpp_1.0.9        
+    ## [1] patchwork_1.1.2   ggplot2_3.4.1     optimx_2023-10.21 SWDMr_1.4        
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] pracma_2.4.2        highr_0.9           compiler_4.2.2     
-    ##  [4] pillar_1.9.0        nloptr_2.0.3        tools_4.2.2        
-    ##  [7] digest_0.6.30       evaluate_0.18       lifecycle_1.0.3    
-    ## [10] tibble_3.2.1        gtable_0.3.1        pkgconfig_2.0.3    
-    ## [13] rlang_1.1.1         cli_3.6.2           rstudioapi_0.14    
-    ## [16] yaml_2.3.6          parallel_4.2.2      xfun_0.34          
-    ## [19] fastmap_1.1.0       withr_2.5.0         dplyr_1.1.2        
-    ## [22] stringr_1.5.0       knitr_1.41          generics_0.1.3     
-    ## [25] vctrs_0.6.3         tidyselect_1.2.0    grid_4.2.2         
+    ##  [1] Rcpp_1.0.9          pracma_2.4.2        highr_0.9          
+    ##  [4] compiler_4.2.2      pillar_1.9.0        nloptr_2.0.3       
+    ##  [7] tools_4.2.2         digest_0.6.30       evaluate_0.18      
+    ## [10] lifecycle_1.0.3     tibble_3.2.1        gtable_0.3.1       
+    ## [13] pkgconfig_2.0.3     rlang_1.1.1         cli_3.6.2          
+    ## [16] rstudioapi_0.14     yaml_2.3.6          xfun_0.34          
+    ## [19] fastmap_1.1.0       withr_2.5.0         stringr_1.5.0      
+    ## [22] dplyr_1.1.2         knitr_1.41          generics_0.1.3     
+    ## [25] vctrs_0.6.3         grid_4.2.2          tidyselect_1.2.0   
     ## [28] glue_1.6.2          R6_2.5.1            fansi_1.0.4        
     ## [31] rmarkdown_2.18      farver_2.1.1        magrittr_2.0.3     
     ## [34] scales_1.2.1        htmltools_0.5.3     colorspace_2.1-0   
