@@ -15,9 +15,17 @@
 #' SWdf<-Read_SW(SleepWakeData)
 #'
 #'@export
-Read_SW<-function(Mres,concat="mean",nepochs=86400,epochlengthsec=4,concattimesec=300){
+Read_SW<-function(Mres,concat="mean",
+                  nepochs=86400,
+                  epochlengthsec=4,
+                  concattimesec=300,
+                  ResultBy="hour"){
   
-  df<-Read_Mouse_States(Mres,concat=concat,nepochs=nepochs,epochlengthsec=epochlengthsec,concattimesec=concattimesec)
+  df<-Read_Mouse_States(Mres,concat=concat,
+                        nepochs=nepochs,
+                        epochlengthsec=epochlengthsec,
+                        concattimesec=concattimesec,
+                        ResultBy = ResultBy)
   df<-AddDaySWdistr(df,concattimesec=concattimesec)
   df<-AddTimeHSWdistr(df,concattimesec=concattimesec)
   return(df)
@@ -110,23 +118,25 @@ SWdf_AddSD<-function(SWdf,Interval){
 }
 
 # Read sleep data
-Read_Mouse_States<-function(Mres,concat="mean",nepochs=86400,epochlengthsec=4,concattimesec=300){
+Read_Mouse_States<-function(Mres,concat="mean",
+                            nepochs=86400,
+                            epochlengthsec=4,
+                            concattimesec=300,
+                            ResultBy="hour"){
   
-  # Mres<-matrix(ncol=length(files),nrow=nepochs)
-  # colnames(Mres)<-files
-  # 
-  # for (f in files){
-  #   x<-read.table(f,stringsAsFactors = F)
-  #   Mres[,f]<-x$V1
-  # }
+
+  if (ResultBy == "hour"){
+    DivBy<-3600
+  }else if (ResultBy == "proportion"){
+    DivBy<-concattimesec
+  }
   
   l_window<-concattimesec/epochlengthsec
   n_window<-nepochs/l_window
+  
   McountW<-matrix(ncol=ncol(Mres),nrow=n_window)
   McountN<-matrix(ncol=ncol(Mres),nrow=n_window)
   McountR<-matrix(ncol=ncol(Mres),nrow=n_window)
-  #LcountW<-matrix(ncol=ncol(Mres),nrow=n_window)
-  #LcountS<-matrix(ncol=ncol(Mres),nrow=n_window)
   
   for (i in 1:n_window){
     for (j in 1:ncol(Mres)){
@@ -134,44 +144,23 @@ Read_Mouse_States<-function(Mres,concat="mean",nepochs=86400,epochlengthsec=4,co
       McountW[i,j]<-length(tmp[tmp == "w" | tmp == "1"])
       McountN[i,j]<-length(tmp[tmp == "n" | tmp == "2"])
       McountR[i,j]<-length(tmp[tmp == "r" | tmp == "3"])
-      
-      # Add a SW seq
-      tmpS<-tmp
-      tmpS[tmp == "w" | tmp == "1"]<-1
-      tmpS[tmp == "n" | tmp == "2" | tmp == "r" | tmp == "3"]<-0
-      tmpS<-as.numeric(tmpS)
-      
-      # Mean continuous length of wake
-      r<-rle(tmpS)
-      m1<-mean(r$lengths[r$values == 1])
-      m0<-mean(r$lengths[r$values == 0])
-      #if (is.nan(m1) | m1 == 0){LcountW[i,j]<-0}else{LcountW[i,j]<-m1}
-      #if (is.nan(m0) | m0 == 0){LcountS[i,j]<-0}else{LcountS[i,j]<-m0}
     }
   }
   
   if (nrow(Mres)>1){
-    CatValW<-apply(McountW,1,concat)*epochlengthsec/3600
-    CatValN<-apply(McountN,1,concat)*epochlengthsec/3600
-    CatValR<-apply(McountR,1,concat)*epochlengthsec/3600
+    CatValW<-apply(McountW,1,concat)*epochlengthsec/DivBy
+    CatValN<-apply(McountN,1,concat)*epochlengthsec/DivBy
+    CatValR<-apply(McountR,1,concat)*epochlengthsec/DivBy
     CatValS<-CatValN+CatValR
-    #LValW<-apply(LcountW,1,concat)*epochlengthsec/3600
-    #LValS<-apply(LcountS,1,concat)*epochlengthsec/
-    LValW<-round(apply(McountW,1,concat))
-    LValS<-round(apply(McountN,1,concat)+apply(McountR,1,concat))
     
   }else{
-    CatValW<-as.numeric(McountW[,1])*epochlengthsec/3600
-    CatValN<-as.numeric(McountN[,1])*epochlengthsec/3600
-    CatValR<-as.numeric(McountR[,1])*epochlengthsec/3600
+    CatValW<-as.numeric(McountW[,1])*epochlengthsec/DivBy
+    CatValN<-as.numeric(McountN[,1])*epochlengthsec/DivBy
+    CatValR<-as.numeric(McountR[,1])*epochlengthsec/DivBy
     CatValS<-CatValN+CatValR
-    #LValW<-as.numeric(LcountW[,1])*epochlengthsec/3600
-    #LValS<-as.numeric(LcountS[,1])*epochlengthsec/3600
-    LValW<-round(as.numeric(McountW[,1]))
-    LValS<-round(as.numeric(McountN[,1])+as.numeric(McountR[,1]))
   }
   
-  df <- data.frame(list(NREM=CatValN,REM=CatValR,Wake=CatValW,Sleep=CatValS,LenW=LValW,LenS=LValS))
+  df <- data.frame(list(NREM=CatValN,REM=CatValR,Wake=CatValW,Sleep=CatValS))
   
   return(df)
   

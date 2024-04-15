@@ -40,6 +40,8 @@ List SDDHO_SinF_RungeKutta(NumericVector y, NumericVector time, NumericVector fo
   
   // Compute Iteration step (h)
   double h  = time[2]-time[1];
+  double h_half = h/2;
+  double h_sq = pow(h,2);
   
   // Vector of time that will be return
   NumericVector TimeReturn(Nstep+1);
@@ -81,22 +83,22 @@ List SDDHO_SinF_RungeKutta(NumericVector y, NumericVector time, NumericVector fo
     k1 = sddho_sinF_derivsecfun(x, v, gamma, k, F);
     
     // k2
-    xstep = x + (h/2)*v;
-    vstep = v + (h/2)*k1;
+    xstep = x + (h_half)*v;
+    vstep = v + (h_half)*k1;
     k2 = sddho_sinF_derivsecfun (xstep, vstep, gamma, k, F);
     
     // k3
-    xstep = x + (h/2)*v + ( (pow(h,2)/4) * k1);
-    vstep = v + (h/2)*k2;
+    xstep = x + (h_half)*v + ( (h_sq/4) * k1);
+    vstep = v + (h_half)*k2;
     k3 = sddho_sinF_derivsecfun (xstep, vstep, gamma, k, F);
     
     // k4
-    xstep = x + h*v + ( (pow(h,2)/2) * k2);
+    xstep = x + h*v + ( (h_sq/2) * k2);
     vstep = v + h*k3;
     k4 = sddho_sinF_derivsecfun (xstep, vstep, gamma, k, F);
     
     // compute new x and v
-    x = x + h*v + (pow(h,2)/6) * (k1+k2+k3);
+    x = x + h*v + (h_sq/6) * (k1+k2+k3);
     v = v + (h/6) * (k1 + 2*k2 + 2*k3 + k4);
     
     Vx[i+1] = x;

@@ -224,6 +224,16 @@ setGeneric("SWDMrStats", function(object,fitted,FittingValue="RSS",detailed=F,ma
 setGeneric("SWDMrGetEvalFun", function(object,match="exact",method="rk4")
   standardGeneric("SWDMrGetEvalFun") )
 
+#' Set parameters of the model
+#'
+#' @param object An SWDMr_DDHO object
+#' @export
+#' @docType methods
+#' @examples
+#' model<-SetParametersModel(model)
+setGeneric("SetParametersModel", function(object)
+  standardGeneric("SetParametersModel") )
+
 
 
 ##########################################################################

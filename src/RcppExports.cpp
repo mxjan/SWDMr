@@ -28,6 +28,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PenalizationUnstableFit
+double PenalizationUnstableFit(Rcpp::NumericVector y1, Rcpp::NumericVector Time, double weight, Rcpp::NumericVector TimeInterval, int DayStabilization);
+RcppExport SEXP _SWDMr_PenalizationUnstableFit(SEXP y1SEXP, SEXP TimeSEXP, SEXP weightSEXP, SEXP TimeIntervalSEXP, SEXP DayStabilizationSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y1(y1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Time(TimeSEXP);
+    Rcpp::traits::input_parameter< double >::type weight(weightSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type TimeInterval(TimeIntervalSEXP);
+    Rcpp::traits::input_parameter< int >::type DayStabilization(DayStabilizationSEXP);
+    rcpp_result_gen = Rcpp::wrap(PenalizationUnstableFit(y1, Time, weight, TimeInterval, DayStabilization));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SDDHO_SinF_RungeKutta
 List SDDHO_SinF_RungeKutta(NumericVector y, NumericVector time, NumericVector force, double gamma, double k, double AmpSin, double PhiSin, double PerSin);
 RcppExport SEXP _SWDMr_SDDHO_SinF_RungeKutta(SEXP ySEXP, SEXP timeSEXP, SEXP forceSEXP, SEXP gammaSEXP, SEXP kSEXP, SEXP AmpSinSEXP, SEXP PhiSinSEXP, SEXP PerSinSEXP) {
@@ -67,6 +82,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SWDMr_CptSprocess", (DL_FUNC) &_SWDMr_CptSprocess, 8},
+    {"_SWDMr_PenalizationUnstableFit", (DL_FUNC) &_SWDMr_PenalizationUnstableFit, 5},
     {"_SWDMr_SDDHO_SinF_RungeKutta", (DL_FUNC) &_SWDMr_SDDHO_SinF_RungeKutta, 8},
     {"_SWDMr_Solve_SDDHO_longdouble", (DL_FUNC) &_SWDMr_Solve_SDDHO_longdouble, 8},
     {NULL, NULL, 0}

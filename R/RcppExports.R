@@ -7,6 +7,11 @@ CptSprocess <- function(Sleep, Wake, time, U, L, t_w, t_s, init) {
 }
 
 #' @export
+PenalizationUnstableFit <- function(y1, Time, weight, TimeInterval, DayStabilization) {
+    .Call('_SWDMr_PenalizationUnstableFit', PACKAGE = 'SWDMr', y1, Time, weight, TimeInterval, DayStabilization)
+}
+
+#' @export
 SDDHO_SinF_RungeKutta <- function(y, time, force, gamma, k, AmpSin, PhiSin, PerSin) {
     .Call('_SWDMr_SDDHO_SinF_RungeKutta', PACKAGE = 'SWDMr', y, time, force, gamma, k, AmpSin, PhiSin, PerSin)
 }

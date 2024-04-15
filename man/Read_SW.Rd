@@ -9,7 +9,8 @@ Read_SW(
   concat = "mean",
   nepochs = 86400,
   epochlengthsec = 4,
-  concattimesec = 300
+  concattimesec = 300,
+  ResultBy = "hour"
 )
 }
 \arguments{

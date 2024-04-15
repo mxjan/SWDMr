@@ -46,6 +46,10 @@ setClass(
     # Objective function is optimized for FitttingValue, can be RSS or Negative Log Likelihood (NLL)
     FittingValue = "character",
     
+    # Finalize parameter that are free or fixed
+    ParameterList = "list",
+    SWf_Matrix = "matrix", # Matrix of forces
+    
     verbose = "numeric"
   ),
   
@@ -80,14 +84,30 @@ setMethod("initialize","SWDMr_DDHO",function(.Object,initmod = "Free",initpos = 
 ############# METHODS ################
 ######################################
 
+# Run when model is completely described
+setMethod("SetParametersModel",signature="SWDMr_DDHO", function(object){
+  # Identify parameters
+  object@ParameterList <- GetFreeFixedParams(object)
+  
+  # Create matrix of forces
+  idxForces<-which(object@ParameterList$AllParams$parameter == "Forces")
+  if (length(idxForces) > 0){
+    SWf<-object@SWdist[,object@ParameterList$AllParams[idxForces,"subparameter"],drop=F]
+    object@SWf_Matrix<-as.matrix(SWf)
+  }else{
+    object@SWf_Matrix<-rep(0,nrow(object@SWdist))
+  }
+  return(object)
+})
+
 
 ####Return a matrix of free and fixed parameters
 setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
 
   # Matrix of free, fixed parameters  
-  freeparams<-matrix(ncol=3,nrow=0)
-  fixedparams<-matrix(ncol=3,nrow=0)
-
+  freeparams<-list()#matrix(ncol=3,nrow=0)
+  fixedparams<-list()#matrix(ncol=3,nrow=0)
+  
   # Core params as intercept [equilibrium], omega [nat. freq.], dampratio | loggamma
   if (object@UseDampingRatio == T){
     CoreParams<-c("intercept","omega","dampratio")
@@ -96,9 +116,9 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   }
   for (param in CoreParams){
     if ( length(slot(object,param)) == 0){
-      freeparams<-rbind(freeparams,c("Core parameter",param,NA))
+      freeparams<-c(freeparams,list(c("Core parameter",param,NA)))
     }else{
-      fixedparams<-rbind(fixedparams,c("Core parameter",param,slot(object,param)))
+      fixedparams<-c(fixedparams,list(c("Core parameter",param,slot(object,param))))
     }
   }
   
@@ -106,9 +126,9 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   if (length(slot(object,"Forces")) > 0){
     for (ForceName in names(slot(object,"Forces"))){
       if (length(object@Forces[[ForceName]]) == 0){
-        freeparams<-rbind(freeparams,c("Forces",ForceName,NA))
+        freeparams<-c(freeparams,list(c("Forces",ForceName,NA)))
       }else{
-        fixedparams<-rbind(fixedparams,c("Forces",ForceName,object@Forces[[ForceName]]))
+        fixedparams<-c(fixedparams,list(c("Forces",ForceName,object@Forces[[ForceName]])))
       }
     }
   }
@@ -117,9 +137,9 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   if (length(slot(object,"AddEffects")) > 0){
     for (AddEffect in names(slot(object,"AddEffects"))){
       if (length(object@AddEffects[[AddEffect]]) == 0){
-        freeparams<-rbind(freeparams,c("AddEffects",AddEffect,NA))
+        freeparams<-c(freeparams,list(c("AddEffects",AddEffect,NA)))
       }else{
-        fixedparams<-rbind(fixedparams,c("AddEffects",AddEffect,object@AddEffects[[AddEffect]]))
+        fixedparams<-c(fixedparams,list(c("AddEffects",AddEffect,object@AddEffects[[AddEffect]])))
       }
     }
   }
@@ -128,29 +148,36 @@ setMethod("GetFreeFixedParams","SWDMr_DDHO",function(object,...) {
   if (slot(object,"SinForce") == T){
     for (SinFparam in c("AmpSin","PhiSin","PerSin")){
       if (length(slot(object,SinFparam)) == 0){
-        freeparams<-rbind(freeparams,c("SinForce",SinFparam,NA))
+        freeparams<-c(freeparams,list(c("SinForce",SinFparam,NA)))
       }else{
-        fixedparams<-rbind(fixedparams,c("SinForce",SinFparam,slot(object,SinFparam)))
+        fixedparams<-c(fixedparams,list(c("SinForce",SinFparam,slot(object,SinFparam))))
       }
     }
   }
   
   # Yinit mode (initial position and speed)
   if (object@initmod == "Free"){
-    freeparams<-rbind(freeparams,c("Yinit","start_pos",NA))
-    freeparams<-rbind(freeparams,c("Yinit","start_speed",NA))
+    freeparams<-c(freeparams,list(c("Yinit","start_pos",NA)))
+    freeparams<-c(freeparams,list(c("Yinit","start_speed",NA)))
   }
   if (object@initmod == "Fixed"){
-    fixedparams<-rbind(fixedparams,c("Yinit","start_pos",object@initpos))
-    fixedparams<-rbind(fixedparams,c("Yinit","start_speed",object@initspeed))
+    fixedparams<-c(fixedparams,list(c("Yinit","start_pos",object@initpos)))
+    fixedparams<-c(fixedparams,list(c("Yinit","start_speed",object@initspeed)))
   }
   
-  freeparams<-data.frame(freeparams,stringsAsFactors = F)
-  colnames(freeparams)<-c("parameter","subparameter","value")
-  fixedparams<-data.frame(fixedparams,stringsAsFactors = F)
-  colnames(fixedparams)<-c("parameter","subparameter","value")
+  freeparams<-do.call("rbind",freeparams)
+  fixedparams<-do.call("rbind",fixedparams)
+  allparams<-rbind(freeparams,fixedparams)
   
-  return(list(FreeParams = freeparams,FixedParams = fixedparams))
+  freeparams<-as.data.frame(freeparams,stringsAsFactors = F)
+  colnames(freeparams)<-c("parameter","subparameter","value")
+  fixedparams<-as.data.frame(fixedparams,stringsAsFactors = F)
+  colnames(fixedparams)<-c("parameter","subparameter","value")
+  allparams<-as.data.frame(allparams,stringsAsFactors = F)
+  colnames(allparams)<-c("parameter","subparameter","value")
+  allparams$value<-as.numeric(allparams$value)
+  
+  return(list(FreeParams = freeparams,FixedParams = fixedparams,AllParams=allparams))
   
 })
 
@@ -316,8 +343,7 @@ setMethod("SumForces",signature="SWDMr_DDHO", function(object,params,allparams=N
   idxForces<-which(allparams$parameter == "Forces")
   if (length(idxForces) > 0){
     Forces<-allparams[idxForces,"value"]
-    SWf<-object@SWdist[,allparams[idxForces,"subparameter"],drop=F]
-    Force <- (as.matrix(SWf) %*% Forces)[,1]
+    Force <- (object@SWf_Matrix %*% Forces)[,1]
   }else{
     Force<-rep(0,nrow(object@SWdist))
   }
@@ -410,25 +436,33 @@ setMethod("AddUnstableFitPenalization",signature="SWDMr_DDHO",function(object,fi
     weight<-object@PenalizeUnstableFitWeight
   }
   
-  # Get min and max in intervals
-  interval_eval<-fitted$time >= object@PredictedValueInterval[1] & fitted$time <= object@PredictedValueInterval[2]
-  sodeinterval<-fitted$y1[interval_eval]
-  idxminv<-which(sodeinterval == min(sodeinterval))[1]
-  idxmaxv<-which(sodeinterval == max(sodeinterval))[1]
+  # Add Penalization to RSS
+  penalization<-PenalizationUnstableFit(y1 = fitted$y1,
+                               Time = fitted$time,
+                               weight = weight,
+                               TimeInterval = c(object@PredictedValueInterval[1],object@PredictedValueInterval[2]),
+                               DayStabilization = object@StabilityDayCheck)
   
-  modultimeminv<-fitted$time[interval_eval][idxminv] %% 24
-  modultimemaxv<-fitted$time[interval_eval][idxmaxv] %% 24
   
-  evaldaytimemin<-cumsum(c(modultimeminv-24,rep(-24,object@StabilityDayCheck)))
-  evaldaytimemax<-cumsum(c(modultimemaxv-24,rep(-24,object@StabilityDayCheck)))
-
-  
-  obsmin<-fitted$y1[sapply(evaldaytimemin,function(x) which.min(abs(fitted$time-x)))]
-  obsmax<-fitted$y1[sapply(evaldaytimemax,function(x) which.min(abs(fitted$time-x)))]
-  obs<-c(obsmin,obsmax )
-  pred<-c(rep(min(sodeinterval),length(obsmin)),rep(max(sodeinterval),length(obsmax)))
-  
-  penalization<-sum((pred-obs)^2)*weight
+  # # Get min and max in intervals
+  # interval_eval<-fitted$time >= object@PredictedValueInterval[1] & fitted$time <= object@PredictedValueInterval[2]
+  # sodeinterval<-fitted$y1[interval_eval]
+  # idxminv<-which(sodeinterval == min(sodeinterval))[1]
+  # idxmaxv<-which(sodeinterval == max(sodeinterval))[1]
+  # 
+  # modultimeminv<-fitted$time[interval_eval][idxminv] %% 24
+  # modultimemaxv<-fitted$time[interval_eval][idxmaxv] %% 24
+  # 
+  # evaldaytimemin<-cumsum(c(modultimeminv-24,rep(-24,object@StabilityDayCheck)))
+  # evaldaytimemax<-cumsum(c(modultimemaxv-24,rep(-24,object@StabilityDayCheck)))
+  # 
+  # obsmin<-fitted$y1[sapply(evaldaytimemin,function(x) which.min(abs(fitted$time-x)))]
+  # obsmax<-fitted$y1[sapply(evaldaytimemax,function(x) which.min(abs(fitted$time-x)))]
+  # 
+  # obs<-c(obsmin,obsmax )
+  # pred<-c(rep(min(sodeinterval),length(obsmin)),rep(max(sodeinterval),length(obsmax)))
+  # 
+  # penalization<-sum((pred-obs)^2)*weight
   
   if (FittingValue == "RSS"){
     return(val+penalization)
@@ -590,19 +624,21 @@ setMethod("StatsPerTimePoint",signature="SWDMr_DDHO", function(object){
   return(meansd)
 })
 
-
+# Return a df of all need and given parameters
+# parameter subparameter      value
+# 1 Core parameter        omega  0.2617994
+# 2 Core parameter     loggamma -2.3025851
+# 3         Forces         Wake  0.0000000
+# 4         Forces        Sleep  0.0000000
+# 5       SinForce       AmpSin  0.0000000
+# 6       SinForce       PhiSin  3.1415927
+# 7 Core parameter    intercept  5.5222779
+# 8       SinForce       PerSin 24.0000000
 setMethod("GetAllParams",signature="SWDMr_DDHO",function(object,params){
   
-  paramofmodel<-GetFreeFixedParams(object)
-  expectedparams<-paramofmodel$FreeParams[,"subparameter"]
-  if (any(! expectedparams %in% names(params))){
-    stop("Missing values in parameter given")
-  }
-  paramofmodel$FreeParams$value<-as.numeric(params[paramofmodel$FreeParams$subparameter])
-  allparams<-rbind(paramofmodel$FreeParams,paramofmodel$FixedParams)
-  allparams$value<-as.numeric(allparams$value)
-  
-  return(allparams)
+  paramofmodel<-object@ParameterList
+  paramofmodel$AllParams$value[1:nrow(paramofmodel$FreeParams)]<-unlist(params[paramofmodel$FreeParams$subparameter])
+  return(paramofmodel$AllParams)
   
 })
 
